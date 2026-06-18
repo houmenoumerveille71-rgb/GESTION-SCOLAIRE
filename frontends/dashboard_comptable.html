@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comptable - ScolarTech</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body onload="checkAuth()">
+<div id="auth-check" style="display:none;">
+    <nav class="navbar navbar-dark bg-success">
+        <div class="container-fluid">
+            <span class="navbar-brand">ScolarTech - Comptable</span>
+            <span class="navbar-text text-white" id="user-nom"></span>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h2>Espace Comptable</h2>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <a href="caisse.html" class="btn btn-success w-100 mb-2">💵 Caisse</a>
+            </div>
+            <div class="col-md-6">
+                <a href="listepaiement.html" class="btn btn-info w-100 mb-2">📋 Historique Paiements</a>
+            </div>
+        </div>
+        <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+    </div>
+</div>
+<script>
+function checkAuth() {
+    fetch('../backends/auth/check.php').then(r=>r.json()).then(d=>{
+        if(d.authenticated && ['comptable','admin','caisier'].includes(d.user.role)){
+            document.getElementById('auth-check').style.display='block';
+            document.getElementById('user-nom').textContent=d.user.nom;
+        } else {
+            window.location='connexion.html';
+        }
+    });
+}
+function logout(){fetch('../backends/auth/logout.php').then(()=>window.location='connexion.html');
+}</script></body></html>

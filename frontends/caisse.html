@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Module de Caisse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Style d'impression pour cacher le reste de la page et n'imprimer QUE le reçu */
+        @media print {
+            body * { display: none; }
+            #receipt, #receipt * { display: block; }
+            .btn-print { display: none !important; }
+        }
+        .receipt-box {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 25px;
+            border: 2px dashed #000;
+            background: #fff;
+        }
+    </style>
+</head>
+<body class="container mt-5">
+    
+    <div class="no-print">
+        <h2>Enregistrement d'un paiement</h2>
+        <div class="mb-3">
+            <input type="text" id="search" class="form-control" placeholder="Rechercher un élève (nom, prénom, matricule)">
+        </div>
+        
+        <div id="eleve-info" class="card p-3 mb-3" style="display:none;">
+            <p><strong>Élève :</strong> <span id="eleve-nom"></span></p>
+            <p><strong>Classe :</strong> <span id="eleve-classe"></span></p>
+            <p><strong>Total dû :</strong> <span id="eleve-total" class="fw-bold"></span></p>
+            <p><strong>Déjà payé :</strong> <span id="eleve-paye" class="text-success fw-bold"></span></p>
+            <p><strong>Reste à payer :</strong> <span id="eleve-reste" class="text-danger fw-bold"></span></p>
+        </div>
+        
+        <form id="paiement-form" style="display:none;" class="mb-4">
+            <input type="hidden" id="eleve-id">
+            <div class="mb-3">
+                <label class="form-label">Montant du versement (FCFA)</label>
+                <input type="number" id="montant" class="form-control" min="1" required>
+            </div>
+            <button type="submit" class="btn btn-success">Valider le paiement</button>
+        </form>
+    </div>
+    
+    <div id="receipt" style="display:none;" class="receipt-box">
+        <div class="text-center mb-3">
+            <h3>REÇU DE PAIEMENT</h3>
+            <p class="fw-bold">N° <span id="recu-numero" class="text-danger"></span></p>
+        </div>
+        <hr>
+        <p><strong>Date :</strong> <span id="recu-date"></span></p>
+        <p><strong>Élève :</strong> <span id="recu-nom"></span></p>
+        <p><strong>Classe / Niveau :</strong> <span id="recu-classe"></span></p>
+        <p><strong>Montant Versé :</strong> <span id="recu-montant" class="fw-bold"></span></p>
+        <p><strong>Reste à Payer :</strong> <span id="recu-reste" class="text-danger fw-bold"></span></p>
+        <hr>
+        <div class="row mt-4">
+            <div class="col-6"></div>
+            <div class="col-6 text-center" style="font-size: 14px;">
+                <p><strong>Nom & Signature du Caissier</strong></p>
+                <p class="mt-2 text-muted" id="recu-caissier"></p>
+                <div style="margin-top: 50px; border-top: 1px dashed #ccc;"></div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <button onclick="window.print()" class="btn btn-primary btn-print">🖨️ Imprimer le reçu</button>
+        </div>
+    </div>
+
+<script>
+let searchTimeout;
+
+function formatArgent(montant) {
+    return new Intl.NumberFormat('fr-FR').format(montant) + " FCFA";
+}
+
+document.getElementById('search').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    if (this.value.trim() === "") {
+        document.getElementById('eleve-info').style.display = 'none';
+        document.getElementById('paiement-form').style.display = 'none';
+        document.getElementById('receipt').style.display = 'none';
+        return;
+    }
+
+    searchTimeout = setTimeout(() => {
+        // Appelle ton script read.php qu'on a configuré ensemble
+        fetch('../backends/eleves/read.php?q=' + encodeURIComponent(this.value))
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    let eleve = data[0];
+                    
+                    // On cache l'ancien reçu si on fait une nouvelle recherche
+                    document.getElementById('receipt').style.display = 'none';
+                    
+                    document.getElementById('eleve-id').value = eleve.id;
+                    document.getElementById('eleve-nom').textContent = (eleve.nom || '').toUpperCase() + ' ' + (eleve.prenom || '');
+                    document.getElementById('eleve-classe').textContent = eleve.nom_classe ;
+                    
+                    // Stockage des valeurs numériques brutes dans des attributs data- pour les calculs JS futurs
+                    document.getElementById('eleve-total').setAttribute('data-val', eleve.total_attendu);
+                    document.getElementById('eleve-paye').setAttribute('data-val', eleve.total_paye);
+                    
+                    // Affichage propre formaté avec "FCFA"
+                    document.getElementById('eleve-total').textContent = formatArgent(eleve.total_attendu);
+                    document.getElementById('eleve-paye').textContent = formatArgent(eleve.total_paye);
+                    document.getElementById('eleve-reste').textContent = formatArgent(eleve.reste_a_payer);
+                    
+                    document.getElementById('eleve-info').style.display = 'block';
+                    document.getElementById('paiement-form').style.display = 'block';
+                } else {
+                    document.getElementById('eleve-info').style.display = 'none';
+                    document.getElementById('paiement-form').style.display = 'none';
+                    document.getElementById('receipt').style.display = 'none';
+                }
+            })
+            .catch(err => console.error("Erreur de recherche:", err));
+    }, 400);
+});
+
+document.getElementById('paiement-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('eleve_id', document.getElementById('eleve-id').value);
+    formData.append('montant', document.getElementById('montant').value);
+    
+    fetch('../backends/paiements/create.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                // Injection des données reçues du PHP directement dans le reçu
+                document.getElementById('recu-numero').textContent = res.data.numero_recu;
+                document.getElementById('recu-date').textContent = res.data.date_paiement;
+                document.getElementById('recu-nom').textContent = document.getElementById('eleve-nom').textContent;
+                document.getElementById('recu-classe').textContent = document.getElementById('eleve-classe').textContent;
+                document.getElementById('recu-montant').textContent = formatArgent(res.data.montant_paye);
+                document.getElementById('recu-reste').textContent = formatArgent(res.data.reste_a_payer);
+                document.getElementById('recu-caissier').textContent = res.data.caissier;
+                
+                // MISE À JOUR EN DIRECT DE L'ÉCRAN DE SAISIE
+                document.getElementById('eleve-reste').textContent = formatArgent(res.data.reste_a_payer);
+                
+                let ancienPaye = parseFloat(document.getElementById('eleve-paye').getAttribute('data-val')) || 0;
+                let nouveauVersement = parseFloat(document.getElementById('montant').value) || 0;
+                let cumulPaye = ancienPaye + nouveauVersement;
+                
+                document.getElementById('eleve-paye').setAttribute('data-val', cumulPaye);
+                document.getElementById('eleve-paye').textContent = formatArgent(cumulPaye);
+                
+                // Afficher le reçu et réinitialiser le formulaire de versement
+                document.getElementById('receipt').style.display = 'block';
+                document.getElementById('montant').value = "";
+                document.getElementById('paiement-form').style.display = 'none';
+            } else {
+                alert(res.message);
+            }
+        })
+        .catch(err => console.error("Erreur d'enregistrement:", err));
+});
+</script>
+</body>
+</html>

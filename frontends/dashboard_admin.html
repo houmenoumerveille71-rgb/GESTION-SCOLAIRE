@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #eef2f5;
+            display: flex;
+            min-height: 100vh;
+            color: #3e5569;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 25px 0;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar .logo-area {
+            padding: 0 25px 20px 25px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #01579b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 25px;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu li a:hover, .sidebar-menu li a.active {
+            color: #3182ce;
+            background-color: #f7fafc;
+        }
+
+        .sidebar-menu li a i {
+            font-size: 16px;
+            color: #718096;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-menu li a:hover i, .sidebar-menu li a.active i {
+            color: #3182ce;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex-grow: 1;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-main-title {
+            padding: 25px 0 15px 0;
+            font-size: 22px;
+            font-weight: 400;
+            color: #4f5f6f;
+        }
+
+        .topbar {
+            background-color: #ffffff;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .topbar .search-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #a0aec0;
+            width: 400px;
+        }
+
+        .iframe-container {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-area">
+            <span style="color: #3182ce;"><i class="fa-solid fa-circle-user"></i></span> Dashboard Admin
+        </div>
+
+        <ul class="sidebar-menu">
+            <li><a href="#" data-page="dashboard_content.html" class="active"><span>Dashboard</span> <i class="fa-solid fa-house"></i></a></li>
+            <li><a href="#" data-page="liste.html"><span>Gestion Élèves</span> <i class="fa-solid fa-users"></i></a></li>
+            <li><a href="#" data-page="scop.php"><span>Gestion des frais scolaire</span> <i class="fa-solid fa-layer-group"></i></a></li>
+            <li><a href="#" data-page="listepaiement.html"><span>Gestion paiement</span> <i class="fa-solid fa-desktop"></i></a></li>
+           
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div class="search-area">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search Project">
+            </div>
+            <div class="user-profile">
+                <span><i class="fa-solid fa-user"></i> Administrateur</span>
+                <button onclick="logout()" class="btn btn-sm btn-outline-danger ms-3">Déconnexion</button>
+            </div>
+        </div>
+
+        <div class="iframe-container">
+            <iframe id="content-frame" src="dashboard_content.html"></iframe>
+        </div>
+    </div>
+
+    <script>
+    function logout() {
+        fetch('../backends/auth/logout.php', { method: 'POST', credentials: 'include' })
+            .then(() => {
+                localStorage.removeItem('user');
+                window.location.href = 'connexion.html';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const links = document.querySelectorAll('.sidebar-menu a');
+        const iframe = document.getElementById('content-frame');
+        
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                links.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                const page = this.getAttribute('data-page');
+                iframe.src = page;
+            });
+        });
+    });
+    </script>
+</body>
+</html>

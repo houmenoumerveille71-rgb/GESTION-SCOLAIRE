@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier une note</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="container mt-5">
+
+<h2>Modifier une note</h2>
+
+<form action="../backends/notes/update.php" method="POST">
+    
+    <!-- ID caché -->
+    <input type="hidden" name="id" id="id">
+
+    <!-- Élève -->
+    <div class="mb-3">
+        <label for="eleve_id" class="form-label">Élève *</label>
+        <select name="eleve_id" class="form-select" id="eleve_id" required>
+            <option value="">-- Sélectionner un élève --</option>
+            <!-- Les options seront remplies par JavaScript -->
+        </select>
+    </div>
+    
+    <!-- Matière -->
+    <div class="mb-3">
+        <label for="matiere_id" class="form-label">Matière *</label>
+        <select name="matiere_id" class="form-select" id="matiere_id" required>
+            <option value="">-- Sélectionner une matière --</option>
+            <!-- Les options seront remplies par JavaScript -->
+        </select>
+    </div>
+    
+    <!-- Note -->
+    <div class="mb-3">
+        <label for="note" class="form-label">Note * (sur 20)</label>
+        <input type="number" name="note" class="form-control" id="note" min="0" max="20" step="0.01" required>
+    </div>
+    
+    <!-- Semestre -->
+    <div class="mb-3">
+        <label for="semestre" class="form-label">Semestre *</label>
+        <select name="semestre" class="form-select" id="semestre" required>
+            <option value="">-- Sélectionner un semestre --</option>
+            <option value="Semestre 1">Semestre 1</option>
+            <option value="Semestre 2">Semestre 2</option>
+        </select>
+    </div>
+    
+    <!-- Année scolaire -->
+    <div class="mb-3">
+        <label for="annee_scolaire" class="form-label">Année scolaire *</label>
+        <input type="text" name="annee_scolaire" class="form-control" id="annee_scolaire" placeholder="Ex: 2024-2025" pattern="\d{4}-\d{4}" required>
+    </div>
+    
+    <!-- Bouton -->
+    <button type="submit" class="btn btn-success">
+        Modifier
+    </button>
+    <a href="liste_notes.html" class="btn btn-secondary">Annuler</a>
+    
+</form>
+
+<script>
+// Charger la liste des élèves
+fetch("../backends/eleves/read.php")
+.then(res => res.json())
+.then(data => {
+    const eleveSelect = document.getElementById("eleve_id");
+    data.forEach(eleve => {
+        const option = document.createElement("option");
+        option.value = eleve.id;
+        option.textContent = `${eleve.nom} ${eleve.prenom} (${eleve.matricule})`;
+        eleveSelect.appendChild(option);
+    });
+});
+
+// Charger la liste des matières
+fetch("../backends/matieres/read.php")
+.then(res => res.json())
+.then(data => {
+    const matiereSelect = document.getElementById("matiere_id");
+    data.forEach(matiere => {
+        const option = document.createElement("option");
+        option.value = matiere.id;
+        option.textContent = matiere.nom_matiere;
+        matiereSelect.appendChild(option);
+    });
+});
+
+// Récupérer ID URL et charger la note pour préremplir le formulaire
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+if (id) {
+    fetch("../backends/notes/read.php")
+    .then(res => res.json())
+    .then(notes => {
+        const note = notes.find(n => n.id == id);
+        if (note) {
+            document.getElementById("id").value = note.id;
+            document.getElementById("eleve_id").value = note.eleve_id;
+            document.getElementById("matiere_id").value = note.matiere_id;
+            document.getElementById("note").value = note.note;
+            document.getElementById("semestre").value = note.semestre;
+            document.getElementById("annee_scolaire").value = note.annee_scolaire;
+        } else {
+            alert("Note non trouvée");
+            window.location.href = "liste_notes.html";
+        }
+    });
+} else {
+    window.location.href = "liste_notes.html";
+}
+</script>
+
+</body>
+</html>

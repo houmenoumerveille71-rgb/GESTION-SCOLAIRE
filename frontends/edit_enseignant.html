@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier enseignant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="container mt-5">
+
+<h2>Modifier un enseignant</h2>
+
+<form action="../backends/enseignants/update.php"
+      method="POST">
+
+    <!-- ID caché -->
+    <input type="hidden" name="id" id="id">
+
+    <!-- Nom -->
+    <div class="mb-3">
+        <label for="nom" class="form-label">Nom *</label>
+        <input type="text" name="nom" class="form-control" id="nom" required>
+    </div>
+
+    <!-- Téléphone -->
+    <div class="mb-3">
+        <label for="telephone" class="form-label">Téléphone</label>
+        <input type="tel" name="telephone" class="form-control" id="telephone">
+    </div>
+
+    <!-- Email -->
+    <div class="mb-3">
+        <label for="email" class="form-label">Email *</label>
+        <input type="email" name="email" class="form-control" id="email" required>
+    </div>
+
+    <!-- Classe -->
+    <div class="mb-3">
+        <label for="classe_id" class="form-label">Classe *</label>
+        <select name="classe_id" class="form-control" id="classe_id" required>
+            <option value="">Sélectionnez une classe</option>
+        </select>
+    </div>
+
+    <!-- Bouton -->
+    <button type="submit" class="btn btn-success">
+        Modifier
+    </button>
+    <a href="liste_enseignants.html" class="btn btn-secondary">Annuler</a>
+
+</form>
+
+<script>
+// Récupérer ID URL
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+// Charger les classes d'abord
+let classes = [];
+fetch("../backends/classes/read.php")
+    .then(res => res.json())
+    .then(data => {
+        classes = data;
+        // Populate classe dropdown
+        const classeSelect = document.getElementById("classe_id");
+        classes.forEach(classe => {
+            const option = document.createElement('option');
+            option.value = classe.id;
+            option.textContent = classe.nom_classe;
+            classeSelect.appendChild(option);
+        });
+        
+        // Puis charger les données de l'enseignant
+        return fetch("../backends/enseignants/read.php");
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Trouver l'enseignant
+        let enseignant = data.find(e => e.id == id);
+        
+        if (enseignant) {
+            // Remplir formulaire
+            document.getElementById("id").value = enseignant.id;
+            document.getElementById("nom").value = enseignant.nom;
+            document.getElementById("telephone").value = enseignant.telephone || '';
+            document.getElementById("email").value = enseignant.email || '';
+            
+            // Sélectionner la classe si elle existe
+            const classeSelect = document.getElementById("classe_id");
+            if (enseignant.classe_id) {
+                classeSelect.value = enseignant.classe_id;
+            }
+        } else {
+            alert("Enseignant non trouvé");
+            window.location.href = "liste_enseignants.html";
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert("Erreur lors du chargement des données");
+        window.location.href = "liste_enseignants.html";
+    });
+</script>
+
+</body>
+</html>

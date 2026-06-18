@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard Content</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 30px;
+        }
+        
+        .dashboard-body {
+            padding: 30px;
+        }
+
+        .dashboard-body .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 25px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            border-radius: 15px;
+            padding: 25px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-purple { background: linear-gradient(135deg, #a855f7, #6366f1); }
+        .card-blue { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+
+        .stat-card .card-top {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-card .card-top i {
+            font-size: 18px;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .stat-card .card-top .title {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-body">
+        <div class="section-title">Dashboard</div>
+
+        <div class="cards-grid">
+            <div class="stat-card card-purple">
+                <div class="card-top">
+                    <i class="fa-solid fa-desktop"></i>
+                    <div class="title">TOTAL ELEVES</div>
+                </div>
+                <div class="card-bottom">
+                    <span class="value" id="total-eleves">0</span>
+                </div>
+            </div>
+
+            <div class="stat-card card-blue">
+                <div class="card-top">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <div class="title">TOTAL ENCAISSÉ</div>
+                </div>
+                <div class="card-bottom">
+                    <span class="value" id="total-encaisse">0 FCFA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function loadStats() {
+        try {
+            const response = await fetch('../backends/paiements/stats.php');
+            const data = await response.json();
+            
+            document.getElementById('total-eleves').textContent = new Intl.NumberFormat('fr-FR').format(data.nb_eleves);
+            document.getElementById('total-encaisse').textContent = new Intl.NumberFormat('fr-FR').format(data.recettes_totales) + ' FCFA';
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Historique des Encaissements</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 20px; }
+            table { width: 100% !important; border: 1px solid #000 !important; }
+        }
+    </style>
+    
+    <script>
+    // Vérification d'authentification (seulement si pas dans un iframe)
+    (function() {
+        if (window.self === window.top) {
+            fetch('../backends/auth/check.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.authenticated) {
+                        window.location.href = 'connexion.html';
+                    }
+                })
+                .catch(() => {
+                    window.location.href = 'connexion.html';
+                });
+        }
+    })();
+    </script>
+</head>
+<body class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <h2>Historique des Paiements Encaissés</h2>
+        <div>
+            <button onclick="window.print()" class="btn btn-secondary">🖨️ Imprimer la liste</button>
+            <a href="caisse.html" class="btn btn-success">💵 Aller à la Caisse</a>
+        </div>
+    </div>
+     
+    <div class="d-none d-print-block text-center mb-4">
+        <h2>RAPPORT DES ENCAISSEMENTS</h2>
+        <p>Date d'extraction : <span id="print-date"></span></p>
+    </div>
+
+    <div class="card p-3 shadow-sm mb-4 no-print">
+        <h5>Total Général Encaissé : <span id="total-general" class="text-success fw-bold">0</span> FCFA</h5>
+    </div>
+
+    <table class="table table-striped table-bordered align-middle" id="table-paiements">
+        <thead class="table-dark">
+            <tr>
+                <th>N° Reçu</th>
+                <th>Date</th>
+                <th>Matricule</th>
+                <th>Élève</th>
+                <th>Montant Versé</th>
+                <th>Reste à Payer</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <script>
+        document.getElementById('print-date').textContent = new Date().toLocaleDateString('fr-FR');
+
+        function formatArgent(montant) {
+            return new Intl.NumberFormat('fr-FR').format(montant) + " FCFA";
+        }
+
+        fetch('../backends/paiements/liste.php')
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    const tbody = document.querySelector('#table-paiements tbody');
+                    tbody.innerHTML = ""; 
+                    
+                    let cumulGeneral = 0;
+
+                    res.data.forEach(paiement => {
+                        cumulGeneral += parseFloat(paiement.montant_verse || 0);
+                        const dateFormatee = new Date(paiement.date_paiement).toLocaleDateString('fr-FR');
+                        
+                        // Style de couleur selon le reste à payer
+                        const couleurReste = paiement.reste_a_payer > 0 ? 'text-danger' : 'text-primary';
+                        const nomMajuscule = (paiement.nom || '').toUpperCase();
+                        const prenomEleve = paiement.prenom || '';
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="fw-bold text-secondary">${paiement.numero_recu}</td>
+                            <td>${dateFormatee}</td>
+                            <td>${paiement.matricule || ''}</td>
+                            <td>${nomMajuscule} ${prenomEleve}</td>
+                            <td class="fw-bold text-success text-end">${formatArgent(paiement.montant_verse)}</td>
+                            <td class="fw-bold ${couleurReste} text-end">${formatArgent(paiement.reste_a_payer)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+
+                    document.getElementById('total-general').textContent = new Intl.NumberFormat('fr-FR').format(cumulGeneral);
+
+                } else {
+                    alert("Erreur lors du chargement : " + res.message);
+                }
+            })
+            .catch(err => console.error("Erreur de connexion :", err));
+    </script>
+</body>
+</html>
