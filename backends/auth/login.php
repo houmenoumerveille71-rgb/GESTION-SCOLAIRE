@@ -1,19 +1,32 @@
 <?php
-// 1. Démarrage de la session
+// =========================================================================
+// 1. AUTORISATIONS CORS (Indispensable pour GitHub Pages)
+// =========================================================================
+header("Access-Control-Allow-Origin: https://houmenoumerveille71-rgb.github.io");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Content-Type: application/json; charset=UTF-8");
+
+// Si GitHub Pages envoie une requête de vérification "OPTIONS", on répond 200 et on s'arrête
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+// 2. Démarrage de la session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 2. Connexion à la base de données (si tu veux quand même faire une vérification ou un enregistrement)
+// 3. Connexion à la base de données Railway
 require "../config/connexion.php";
 
-// 3. Déclaration du format de réponse en JSON
-header("Content-Type: application/json");
+// Récupération des données (gère à la fois le format Formulaire et le format JSON envoyé par fetch)
+$inputData = json_decode(file_get_contents("php://input"), true);
+$email_saisi = trim($inputData['email'] ?? $_POST['email'] ?? '');
+$mdp_saisi = $inputData['mot_de_passe'] ?? $_POST['mot_de_passe'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Récupération des données saisies par l'utilisateur
-    $email_saisi = trim($_POST['email'] ?? '');
-    $mdp_saisi = $_POST['mot_de_passe'] ?? '';
 
     // Validation des champs vides
     if (empty($email_saisi) || empty($mdp_saisi)) {
@@ -22,80 +35,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // =========================================================================
-    // CONFIGURATION DES IDENTIFIANTS EN DUR (Tu peux modifier les valeurs ici)
+    // CONFIGURATION DES IDENTIFIANTS EN DUR
     // =========================================================================
-    
-    // 1. Identifiants de l'Administrateur
     $admin_email = "admin@ecole.com";
-    $admin_mdp   = "Admin2026"; // Ton mot de passe en clair pour le test en dur
+    $admin_mdp   = "Admin2026";
 
-    // 2. Identifiants du Comptable
     $comptable_email = "comptable@ecole.com";
     $comptable_mdp   = "Compta2026";
 
-    // 3. Identifiants du Caissier
     $caissier_email = "caissier@ecole.com";
     $caissier_mdp   = "Caisse2026";
 
     // =========================================================================
     // VÉRIFICATION DES IDENTIFIANTS ET REDIRECTION
     // =========================================================================
-
     $success = false;
     $redirectUrl = '';
     $user_nom = '';
     $user_role = '';
 
-    // Cas 1 : C'est l'Administrateur
     if ($email_saisi === $admin_email && $mdp_saisi === $admin_mdp) {
         $success = true;
         $user_nom = "Administrateur Principal";
         $user_role = "admin";
-        $redirectUrl = '../frontends/dashboard_admin.html';
+        $redirectUrl = 'https://houmenoumerveille71-rgb.github.io/GESTION-SCOLAIRE/frontends/dashboard_admin.html';
     } 
-    // Cas 2 : C'est le Comptable
     elseif ($email_saisi === $comptable_email && $mdp_saisi === $comptable_mdp) {
         $success = true;
         $user_nom = "Gestionnaire Comptable";
         $user_role = "comptable";
-        $redirectUrl = '../frontends/index.html';
+        $redirectUrl = 'https://houmenoumerveille71-rgb.github.io/GESTION-SCOLAIRE/frontends/index.html';
     } 
-    // Cas 3 : C'est le Caissier
     elseif ($email_saisi === $caissier_email && $mdp_saisi === $caissier_mdp) {
         $success = true;
         $user_nom = "Caissier Service";
         $user_role = "caissier";
-        $redirectUrl = '../frontends/index.html';
+        $redirectUrl = 'https://houmenoumerveille71-rgb.github.io/GESTION-SCOLAIRE/frontends/index.html';
     }
 
     // =========================================================================
     // TRAITEMENT DU RÉSULTAT
     // =========================================================================
-
     if ($success) {
-        // Enregistrement dans la session PHP pour sécuriser les pages suivantes
-        $_SESSION['user_id']    = $user_role . '_fixed'; // Génère un ID fictif pour la session
+        $_SESSION['user_id']    = $user_role . '_fixed';
         $_SESSION['user_nom']   = $user_nom;
         $_SESSION['user_email'] = $email_saisi;
         $_SESSION['user_role']  = $user_role;
 
-        // Optionnel : Si tu veux quand même vérifier que l'utilisateur existe dans la BDD,
-        // tu peux laisser cette requête, sinon tu peux l'enlever.
+        // Optionnel : Tentative de journalisation ou log en BDD sans bloquer l'utilisateur
         try {
-            $stmt = $bd->prepare("SELECT id FROM utilisateurs WHERE email = ?");
-            $stmt->execute([$email_saisi]);
-            $user_bdd = $stmt->fetch();
-            
-            if (!$user_bdd) {
-                // Si l'email n'est pas trouvé du tout dans la table SQL
-                echo json_encode(['success' => false, 'message' => 'Identifiants valides mais utilisateur absent de la base de données.']);
-                exit;
+            if (isset($bd)) {
+                $stmt = $bd->prepare("SELECT id FROM utilisateurs WHERE email = ?");
+                $stmt->execute([$email_saisi]);
+                $user_bdd = $stmt->fetch();
+                
+                // Si l'utilisateur par défaut n'existe pas encore en BDD, on peut choisir 
+                // de l'insérer automatiquement pour que ta BDD se remplisse toute seule !
+                if (!$user_bdd) {
+                    $insert = $bd->prepare("INSERT INTO utilisateurs (nom, email, mot_de_passe, role) VALUES (?, ?, ?, ?)");
+                    // Note : On sauvegarde le mot de passe hashé par sécurité en BDD
+                    $insert->execute([$user_nom, $email_saisi, password_hash($mdp_saisi, PASSWORD_BCRYPT), $user_role]);
+                }
             }
         } catch (Exception $e) {
-            // Évite de bloquer si la BDD a un problème passager
+            // Si la table n'existe pas encore ou bug de connexion, on laisse passer l'admin static
         }
 
-        // Envoi de la réponse positive avec le lien vers sa page dédiée
         echo json_encode([
             'success'  => true,
             'message'  => 'Connexion réussie ! Autorisée par le système.',
@@ -108,8 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
 
     } else {
-        // Si aucun des trois blocs 'if' ou 'elseif' n'a fonctionné
-        echo json_encode(['success' => false, 'message' => 'Email ou mot de passe incorrect pour ce profil.']);
+        echo json_encode(['success' => false, 'message' => 'Email ou mot de passe incorrect.']);
         exit;
     }
 
