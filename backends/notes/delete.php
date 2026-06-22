@@ -5,11 +5,11 @@ require "../config/auth.php";
 
 // Check if user is logged in and is admin
 if (!estConnecte()) {
-    header("Location: ../frontends/connexion.html");
+    header("Location: ../../frontends/connexion.html");
     exit;
 }
 if (!estAdmin()) {
-    header("Location: ../frontends/acces_interdit.html");
+    header("Location: ../../frontends/acces_interdit.html");
     exit;
 }
 
@@ -28,18 +28,18 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         $q->execute(array($id));
 
         // Redirection vers la liste
-        header("Location: ../../frontends/liste_notes.html");
+        header("Location: ../../../frontends/liste_notes.html");
         exit;
 
     } catch (Exception $e) {
         // En cas d'erreur, on redirige quand même avec un message en session si possible
         $_SESSION['error'] = "Erreur lors de la suppression: " . $e->getMessage();
-        header("Location: ../../frontends/liste_notes.html");
+        header("Location: ../../../frontends/liste_notes.html");
         exit;
     }
 } else {
     // Aucun id fourni, rediriger vers la liste
-    header("Location: ../../frontends/liste_notes.html");
+    header("Location: ../../../frontends/liste_notes.html");
     exit;
 }
 ?>

@@ -11,11 +11,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Check if user is logged in and is admin
 if (!estConnecte()) {
-    header("Location: ../frontends/connexion.html");
+    header("Location: ../../frontends/connexion.html");
     exit;
 }
 if (!estAdmin()) {
-    header("Location: ../frontends/acces_interdit.html");
+    header("Location: ../../frontends/acces_interdit.html");
     exit;
 }
 
@@ -28,13 +28,13 @@ if (!estAdmin()) {
     // Validation basique
     if (empty($id) || empty($nom)) {
         $_SESSION['error'] = "L'ID et le nom sont requis";
-        header("Location: ../frontends/edit_enseignant.html?id=" . $id);
+        header("Location: ../../frontends/edit_enseignant.html?id=" . $id);
         exit;
     }
 
     if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['error'] = "Email invalide";
-        header("Location: ../frontends/edit_enseignant.html?id=" . $id);
+        header("Location: ../../frontends/edit_enseignant.html?id=" . $id);
         exit;
     }
 
@@ -55,7 +55,7 @@ if (!estAdmin()) {
         ));
 
         // Redirection vers la liste
-        header("Location: ../../frontends/liste_enseignants.html");
+        header("Location: ../../../frontends/liste_enseignants.html");
         exit;
 
     } catch (Exception $e) {
@@ -65,12 +65,12 @@ if (!estAdmin()) {
         } else {
             $_SESSION['error'] = "Erreur lors de la mise à jour: " . $e->getMessage();
         }
-        header("Location: ../../frontends/edit_enseignant.html?id=" . $id);
+        header("Location: ../../../frontends/edit_enseignant.html?id=" . $id);
         exit;
     }
 } else {
     // Accès direct en GET - rediriger vers la liste
-    header("Location: ../../frontends/liste_enseignants.html");
+    header("Location: ../../../frontends/liste_enseignants.html");
     exit;
 }
 ?>

@@ -11,7 +11,7 @@ if (!estConnecte()) {
         echo json_encode(['success' => false, 'message' => 'Non connecté']);
         exit;
     } else {
-        header("Location: ../frontends/connexion.html");
+        header("Location: ../../frontends/connexion.html");
         exit;
     }
 }
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation basique
     if (empty($nom_matiere)) {
         $_SESSION['error'] = "Le nom de la matière est requis";
-        header("Location: ../../frontends/ajout_matiere.html");
+        header("Location: ../../../frontends/ajout_matiere.html");
         exit;
     }
 
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ));
 
         // Redirection vers la liste
-        header("Location: ../../frontends/liste_matieres.html");
+        header("Location: ../../../frontends/liste_matieres.html");
         exit;
 
     } catch (Exception $e) {
@@ -58,12 +58,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['error'] = "Erreur lors de l'ajout: " . $e->getMessage();
         }
-        header("Location: ../../frontends/ajout_matiere.html");
+        header("Location: ../../../frontends/ajout_matiere.html");
         exit;
     }
 } else {
     // Accès direct en GET - rediriger vers le formulaire
-    header("Location: ../../frontends/ajout_matiere.html");
+    header("Location: ../../../frontends/ajout_matiere.html");
     exit;
 }
 ?>

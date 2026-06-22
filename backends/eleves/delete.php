@@ -10,7 +10,7 @@ if (!estConnecte()) {
         echo json_encode(['success' => false, 'message' => 'Non connecté']);
         exit;
     } else {
-        header("Location: ../frontends/connexion.html");
+        header("Location: ../../frontends/connexion.html");
         exit;
     }
 }
@@ -29,7 +29,7 @@ if (isset($_GET['id'])) {
     $success = $q->execute(array($id));
     
     if ($success) {
-        header("Location: ../../frontends/liste.html");
+        header("Location: ../../../frontends/liste.html");
         exit;
     } else {
         echo "Erreur suppression";

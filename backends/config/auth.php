@@ -16,7 +16,7 @@ function estAdmin() {
 // Function to redirect to login if not connected
 function redirigerSiNonConnecte() {
     if (!estConnecte()) {
-        header('Location: ../frontends/connexion.html');
+        header('Location: ../../frontends/connexion.html');
         exit;
     }
 }
@@ -31,7 +31,7 @@ function redirigerSiNonAdmin() {
             exit;
         } else {
             // For regular page requests, redirect to an error page or home
-            header('Location: ../frontends/acces_interdit.html');
+            header('Location: ../../frontends/acces_interdit.html');
             exit;
         }
     }
