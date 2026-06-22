@@ -6,6 +6,7 @@
     <title>Admin Dashboard Content</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <style>
         body {
             background: white;
@@ -109,7 +110,7 @@
     <script>
     async function loadStats() {
         try {
-            const response = await fetch('../backends/paiements/stats.php');
+            const response = await fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/paiements/stats.php');
             const data = await response.json();
             
             document.getElementById('total-eleves').textContent = new Intl.NumberFormat('fr-FR').format(data.nb_eleves);

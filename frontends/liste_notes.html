@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Liste des notes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body class="container mt-5">
@@ -29,7 +30,7 @@
 </table>
 
 <script>
-fetch("../backends/notes/read.php")
+fetch("https://gestion-scolaire-production-5e27.up.railway.app/backends/notes/read.php")
 .then(res => res.json())
 .then(data => {
 
@@ -45,7 +46,7 @@ fetch("../backends/notes/read.php")
             <td>${note.semestre}</td>
             <td>${note.annee_scolaire}</td>
             <td>
-                <a href="../backends/notes/delete.php?id=${note.id}" 
+                <a href="https://gestion-scolaire-production-5e27.up.railway.app/backends/notes/delete.php?id=${note.id}" 
                    onclick="return confirm('Supprimer cette note ?')"
                    class="btn btn-danger btn-sm">
                     Supprimer

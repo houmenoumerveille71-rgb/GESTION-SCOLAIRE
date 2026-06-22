@@ -2,15 +2,17 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier enseignant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body class="container mt-5">
 
 <h2>Modifier un enseignant</h2>
 
-<form action="../backends/enseignants/update.php"
+<form action="https://gestion-scolaire-production-5e27.up.railway.app/backends/enseignants/update.php"
       method="POST">
 
     <!-- ID caché -->
@@ -57,7 +59,7 @@ const id = params.get("id");
 
 // Charger les classes d'abord
 let classes = [];
-fetch("../backends/classes/read.php")
+fetch("https://gestion-scolaire-production-5e27.up.railway.app/backends/classes/read.php")
     .then(res => res.json())
     .then(data => {
         classes = data;
@@ -71,7 +73,7 @@ fetch("../backends/classes/read.php")
         });
         
         // Puis charger les données de l'enseignant
-        return fetch("../backends/enseignants/read.php");
+        return fetch("https://gestion-scolaire-production-5e27.up.railway.app/backends/enseignants/read.php");
     })
     .then(res => res.json())
     .then(data => {

@@ -6,6 +6,7 @@
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/responsive.css">
     
     <style>
         * {
@@ -168,7 +169,13 @@
 </head>
 <body>
 
-    <div class="sidebar">
+    <button class="navbar-toggler" id="sidebarToggle" aria-label="Toggle navigation">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="logo-area">
             <span style="color: #3182ce;"><i class="fa-solid fa-circle-user"></i></span> Dashboard Admin
         </div>
@@ -184,9 +191,12 @@
 
     <div class="main-content">
         <div class="topbar">
+            <button class="navbar-toggler show-mobile" id="sidebarToggleMobile" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <div class="search-area">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Search Project">
+                <input type="text" placeholder="Rechercher..." class="form-control">
             </div>
             <div class="user-profile">
                 <span><i class="fa-solid fa-user"></i> Administrateur</span>
@@ -201,13 +211,38 @@
 
     <script>
     function logout() {
-        fetch('../backends/auth/logout.php', { method: 'POST', credentials: 'include' })
+        fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/auth/logout.php', { method: 'POST', credentials: 'include' })
             .then(() => {
                 localStorage.removeItem('user');
                 window.location.href = 'connexion.html';
             });
     }
 
+    // Gestion du menu mobile
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', toggleSidebar);
+    }
+    
+    if (sidebarToggleMobile) {
+        sidebarToggleMobile.addEventListener('click', toggleSidebar);
+    }
+    
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+    }
+
+    // Fermer le sidebar quand on clique sur un lien (mobile)
     document.addEventListener('DOMContentLoaded', function() {
         const links = document.querySelectorAll('.sidebar-menu a');
         const iframe = document.getElementById('content-frame');
@@ -221,7 +256,21 @@
                 
                 const page = this.getAttribute('data-page');
                 iframe.src = page;
+                
+                // Fermer le sidebar sur mobile après clic
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
             });
+        });
+        
+        // Gérer le redimensionnement
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
         });
     });
     </script>
