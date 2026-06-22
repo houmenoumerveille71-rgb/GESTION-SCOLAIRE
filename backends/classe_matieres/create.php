@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation basique
     if (empty($classe_id) || empty($matiere_id)) {
         $_SESSION['error'] = "La classe et la matière sont requises";
-        header("Location: ../../../frontends/ajout_classe_matiere.html");
+        header("Location: ../../frontends/ajout_classe_matiere.html");
         exit;
     }
 
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $check->execute(array($classe_id, $matiere_id));
         if ($check->rowCount() > 0) {
             $_SESSION['error'] = "Cette association existe déjà";
-            header("Location: ../../../frontends/ajout_classe_matiere.html");
+            header("Location: ../../frontends/ajout_classe_matiere.html");
             exit;
         }
 
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ));
 
         // Redirection vers la liste
-        header("Location: ../../../frontends/liste_classes_matieres.html");
+        header("Location: ../../frontends/liste_classes_matieres.html");
         exit;
 
     } catch (Exception $e) {
@@ -67,12 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['error'] = "Erreur lors de l'ajout: " . $e->getMessage();
         }
-        header("Location: ../../../frontends/ajout_classe_matiere.html");
+        header("Location: ../../frontends/ajout_classe_matiere.html");
         exit;
     }
 } else {
     // Accès direct en GET - rediriger vers le formulaire
-    header("Location: ../../../frontends/ajout_classe_matiere.html");
+    header("Location: ../../frontends/ajout_classe_matiere.html");
     exit;
 }
 ?>

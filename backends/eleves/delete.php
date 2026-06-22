@@ -29,7 +29,7 @@ if (isset($_GET['id'])) {
     $success = $q->execute(array($id));
     
     if ($success) {
-        header("Location: ../../../frontends/liste.html");
+        header("Location: ../../frontends/liste.html");
         exit;
     } else {
         echo "Erreur suppression";

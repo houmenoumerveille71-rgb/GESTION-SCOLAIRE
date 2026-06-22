@@ -55,7 +55,7 @@ if (!estAdmin()) {
         ));
 
         // Redirection vers la liste
-        header("Location: ../../../frontends/liste_enseignants.html");
+        header("Location: ../../frontends/liste_enseignants.html");
         exit;
 
     } catch (Exception $e) {
@@ -65,12 +65,12 @@ if (!estAdmin()) {
         } else {
             $_SESSION['error'] = "Erreur lors de la mise à jour: " . $e->getMessage();
         }
-        header("Location: ../../../frontends/edit_enseignant.html?id=" . $id);
+        header("Location: ../../frontends/edit_enseignant.html?id=" . $id);
         exit;
     }
 } else {
     // Accès direct en GET - rediriger vers la liste
-    header("Location: ../../../frontends/liste_enseignants.html");
+    header("Location: ../../frontends/liste_enseignants.html");
     exit;
 }
 ?>

@@ -29,18 +29,18 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         $q->execute(array($id));
 
         // Redirection vers la liste
-        header("Location: ../../../frontends/liste_enseignants.html");
+        header("Location: ../../frontends/liste_enseignants.html");
         exit;
 
     } catch (Exception $e) {
         // En cas d'erreur, on redirige quand même avec un message en session si possible
         $_SESSION['error'] = "Erreur lors de la suppression: " . $e->getMessage();
-        header("Location: ../../../frontends/liste_enseignants.html");
+        header("Location: ../../frontends/liste_enseignants.html");
         exit;
     }
 } else {
     // Aucun id fourni, rediriger vers la liste
-    header("Location: ../../../frontends/liste_enseignants.html");
+    header("Location: ../../frontends/liste_enseignants.html");
     exit;
 }
 ?>

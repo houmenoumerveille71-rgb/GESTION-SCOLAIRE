@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation basique
     if (empty($id) || empty($classe_id) || empty($matiere_id)) {
         $_SESSION['error'] = "Tous les champs sont requis";
-        header("Location: ../../../frontends/edit_classe_matiere.html?id=$id");
+        header("Location: ../../frontends/edit_classe_matiere.html?id=$id");
         exit;
     }
 
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $check->execute(array($classe_id, $matiere_id, $id));
         if ($check->rowCount() > 0) {
             $_SESSION['error'] = "Cette association existe déjà";
-            header("Location: ../../../frontends/edit_classe_matiere.html?id=$id");
+            header("Location: ../../frontends/edit_classe_matiere.html?id=$id");
             exit;
         }
 
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ));
 
         // Redirection vers la liste
-        header("Location: ../../../frontends/liste_classes_matieres.html");
+        header("Location: ../../frontends/liste_classes_matieres.html");
         exit;
 
     } catch (Exception $e) {
@@ -68,12 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['error'] = "Erreur lors de la mise à jour: " . $e->getMessage();
         }
-        header("Location: ../../../frontends/edit_classe_matiere.html?id=$id");
+        header("Location: ../../frontends/edit_classe_matiere.html?id=$id");
         exit;
     }
 } else {
     // Accès direct en GET - rediriger vers la liste
-    header("Location: ../../../frontends/liste_classes_matieres.html");
+    header("Location: ../../frontends/liste_classes_matieres.html");
     exit;
 }
 ?>

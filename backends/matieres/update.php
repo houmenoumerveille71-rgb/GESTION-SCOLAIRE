@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation basique
     if (empty($id) || empty($nom_matiere)) {
         $_SESSION['error'] = "L'ID et le nom de la matière sont requis";
-        header("Location: ../../../frontends/edit_matiere.html?id=" . $id);
+        header("Location: ../../frontends/edit_matiere.html?id=" . $id);
         exit;
     }
 
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ));
 
         // Redirection vers la liste
-        header("Location: ../../../frontends/liste_matieres.html");
+        header("Location: ../../frontends/liste_matieres.html");
         exit;
 
     } catch (Exception $e) {
@@ -56,12 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['error'] = "Erreur lors de la mise à jour: " . $e->getMessage();
         }
-        header("Location: ../../../frontends/edit_matiere.html?id=" . $id);
+        header("Location: ../../frontends/edit_matiere.html?id=" . $id);
         exit;
     }
 } else {
     // Accès direct en GET - rediriger vers la liste
-    header("Location: ../../../frontends/liste_matieres.html");
+    header("Location: ../../frontends/liste_matieres.html");
     exit;
 }
 ?>

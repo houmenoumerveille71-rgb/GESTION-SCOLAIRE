@@ -11,7 +11,7 @@ require "../config/auth.php";
 
 // Check if user is logged in and is admin
 if (!estConnecte()) {
-    header("Location: ../../../frontends/connexion.html");
+    header("Location: ../../frontends/connexion.html");
     exit;
 }
 if (!estAdmin()) {
@@ -95,7 +95,7 @@ if (isset($_POST['ajouter'])) {
         $bd->commit();
 
         // Redirection vers la liste
-        header("Location: ../../../frontends/liste.html");
+        header("Location: ../../frontends/liste.html");
         exit;
 
     } catch (Exception $e) {

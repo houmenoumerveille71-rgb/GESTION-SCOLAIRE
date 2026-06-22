@@ -107,7 +107,7 @@ if (isset($_POST['modifier'])) {
         // Valider la transaction
         $bd->commit();
 
-        header("Location: ../../../frontends/liste.html");
+        header("Location: ../../frontends/liste.html");
         exit;
 
     } catch (Exception $e) {

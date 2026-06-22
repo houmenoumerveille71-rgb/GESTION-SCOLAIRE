@@ -32,14 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation basique
     if (empty($id) || empty($eleve_id) || empty($matiere_id) || empty($note) || empty($semestre) || empty($annee_scolaire)) {
         $_SESSION['error'] = "Tous les champs sont requis";
-        header("Location: ../../../frontends/edit_note.html?id=" . $id);
+        header("Location: ../../frontends/edit_note.html?id=" . $id);
         exit;
     }
 
     // Validation de la note (doit être un nombre entre 0 et 20)
     if (!is_numeric($note) || $note < 0 || $note > 20) {
         $_SESSION['error'] = "La note doit être un nombre entre 0 et 20";
-        header("Location: ../../../frontends/edit_note.html?id=" . $id);
+        header("Location: ../../frontends/edit_note.html?id=" . $id);
         exit;
     }
 
@@ -47,14 +47,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $semestres_valides = array('Semestre 1', 'Semestre 2');
     if (!in_array($semestre, $semestres_valides)) {
         $_SESSION['error'] = "Semestre invalide";
-        header("Location: ../../../frontends/edit_note.html?id=" . $id);
+        header("Location: ../../frontends/edit_note.html?id=" . $id);
         exit;
     }
 
     // Validation de l'année scolaire (format simple: ex: 2024-2025)
     if (!preg_match('/^\d{4}-\d{4}$/', $annee_scolaire)) {
         $_SESSION['error'] = "L'année scolaire doit être au format AAAA-AAAA (ex: 2024-2025)";
-        header("Location: ../../../frontends/edit_note.html?id=" . $id);
+        header("Location: ../../frontends/edit_note.html?id=" . $id);
         exit;
     }
 
@@ -76,18 +76,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ));
 
         // Redirection vers la liste
-        header("Location: ../../../frontends/liste_notes.html");
+        header("Location: ../../frontends/liste_notes.html");
         exit;
 
     } catch (Exception $e) {
         // Gestion des erreurs
         $_SESSION['error'] = "Erreur lors de la mise à jour: " . $e->getMessage();
-        header("Location: ../../../frontends/edit_note.html?id=" . $id);
+        header("Location: ../../frontends/edit_note.html?id=" . $id);
         exit;
     }
 } else {
     // Accès direct en GET - rediriger vers la liste
-    header("Location: ../../../frontends/liste_notes.html");
+    header("Location: ../../frontends/liste_notes.html");
     exit;
 }
 ?>
