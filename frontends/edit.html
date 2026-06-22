@@ -2,140 +2,128 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier élève</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .btn-group-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn-group-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 
-<body class="container mt-5">
+<body class="container mt-4 mt-sm-5 px-3 px-sm-4">
 
-<h2>Modifier élève</h2>
+<h2 class="h3 h-sm-2 mb-4 mb-sm-3">Modifier élève</h2>
 
 <form action="../backends/eleves/update.php"
       method="POST"
       enctype="multipart/form-data">
 
-    <!-- ID caché -->
     <input type="hidden" name="id" id="id">
 
-    <!-- Matricule -->
-    <label>Matricule</label>
-    <input type="text"
-           name="matricule"
-           id="matricule"
-           class="form-control mb-3">
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Matricule</label>
+        <input type="text" name="matricule" id="matricule" class="form-control form-control-lg">
+    </div>
 
-    <!-- Nom -->
-    <label>Nom</label>
-    <input type="text"
-           name="nom"
-           id="nom"
-           class="form-control mb-3">
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Nom</label>
+        <input type="text" name="nom" id="nom" class="form-control form-control-lg">
+    </div>
 
-    <!-- Prénom -->
-    <label>Prénom</label>
-    <input type="text"
-           name="prenom"
-           id="prenom"
-           class="form-control mb-3">
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Prénom</label>
+        <input type="text" name="prenom" id="prenom" class="form-control form-control-lg">
+    </div>
 
-    <!-- Sexe -->
-    <label>Sexe</label>
-    <select name="sexe"
-            id="sexe"
-            class="form-control mb-3">
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Sexe</label>
+        <select name="sexe" id="sexe" class="form-control form-control-lg">
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+        </select>
+    </div>
 
-        <option value="M">Masculin</option>
-        <option value="F">Féminin</option>
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Date naissance</label>
+        <input type="date" name="date_naissance" id="date_naissance" class="form-control form-control-lg">
+    </div>
 
-    </select>
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Nom parent</label>
+        <input type="text" name="nom_parent" id="nom_parent" class="form-control form-control-lg">
+    </div>
 
-    <!-- Date naissance -->
-    <label>Date naissance</label>
-    <input type="date"
-           name="date_naissance"
-           id="date_naissance"
-           class="form-control mb-3">
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Téléphone parent</label>
+        <input type="text" name="telephone_parent" id="telephone_parent" class="form-control form-control-lg">
+    </div>
 
-    <!-- Parent -->
-    <label>Nom parent</label>
-    <input type="text"
-           name="nom_parent"
-           id="nom_parent"
-           class="form-control mb-3">
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Adresse</label>
+        <textarea name="adresse" id="adresse" class="form-control form-control-lg"></textarea>
+    </div>
 
-    <!-- Téléphone -->
-    <label>Téléphone parent</label>
-    <input type="text"
-           name="telephone_parent"
-           id="telephone_parent"
-           class="form-control mb-3">
+    <div class="mb-3 mb-sm-4">
+        <label class="form-label">Classe</label>
+        <select name="classe_id" id="classe_id" class="form-control form-control-lg">
+            <option value="">Sélectionnez une classe</option>
+        </select>
+    </div>
 
-    <!-- Adresse -->
-    <label>Adresse</label>
-    <textarea name="adresse"
-              id="adresse"
-              class="form-control mb-3"></textarea>
-
-    <!-- Classe -->
-    <label>Classe</label>
-    <input type="number"
-           name="classe_id"
-           id="classe_id"
-           class="form-control mb-3">
-
-
-    <!-- Bouton -->
-    <button type="submit"
-            name="modifier"
-            class="btn btn-success">
-
-        Modifier
-
-    </button>
+    <div class="btn-group-actions d-flex flex-column flex-sm-row gap-2">
+        <button type="submit" name="modifier" class="btn btn-success btn-lg">
+            Modifier
+        </button>
+        <a href="liste.html" class="btn btn-secondary btn-lg">Annuler</a>
+    </div>
 
 </form>
 
 <script>
-
-// Récupérer ID URL
 const params = new URLSearchParams(window.location.search);
-
 const id = params.get("id");
 
-// Charger les élèves
 fetch("../backends/eleves/read.php")
-
 .then(res => res.json())
-
-.then(data => {
-
-    // Trouver l'élève
+.then(async (data) => {
     let eleve = data.find(e => e.id == id);
-
-    // Remplir formulaire
+    
     document.getElementById("id").value = eleve.id;
-
     document.getElementById("matricule").value = eleve.matricule;
-
     document.getElementById("nom").value = eleve.nom;
-
     document.getElementById("prenom").value = eleve.prenom;
-
     document.getElementById("sexe").value = eleve.sexe;
-
     document.getElementById("date_naissance").value = eleve.date_naissance;
-
     document.getElementById("nom_parent").value = eleve.nom_parent;
-
     document.getElementById("telephone_parent").value = eleve.telephone_parent;
-
     document.getElementById("adresse").value = eleve.adresse;
-
     document.getElementById("classe_id").value = eleve.classe_id;
-
+    
+    // Charger les classes pour le select
+    const classes = await fetch('../backends/classes/read.php').then(r => r.json());
+    const classeSelect = document.querySelector('select[name="classe_id"]');
+    classes.forEach(classe => {
+        const option = document.createElement('option');
+        option.value = classe.id;
+        option.textContent = classe.nom_classe;
+        classeSelect.appendChild(option);
+    });
 });
-
 </script>
 
 </body>

@@ -5,14 +5,12 @@ header("Content-Type: application/json; charset=utf-8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
-        // Sélection des colonnes demandées par le frontend
-        $sql = "SELECT id, nom_classe, montant_scolaire FROM classes ORDER BY id ASC";
+        $sql = "SELECT code_classe as id, nom_classe, montant_scolarite as montant_scolaire FROM classes ORDER BY code_classe ASC";
         $stmt = $bd->prepare($sql);
         $stmt->execute();
         
         $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Envoi direct du tableau JSON requis par ton script JavaScript
         echo json_encode($classes);
         exit;
 

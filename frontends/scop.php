@@ -58,18 +58,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #eef2f5; display: flex; min-height: 100vh; color: #3e5569; }
-        .main-content { flex-grow: 1; padding: 30px; }
+        .main-content { flex-grow: 1; padding: 30px 15px; }
         .page-main-title { padding-bottom: 25px; font-size: 22px; font-weight: 400; color: #4f5f6f; }
-        .table-container { background-color: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #cbd5e0; }
+        .table-container { background-color: #ffffff; border-radius: 8px; padding: 20px 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #cbd5e0; }
         .table-title { font-size: 18px; font-weight: 600; color: #2d3748; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { font-size: 14px; font-weight: 600; color: #718096; padding: 12px 16px; border-bottom: 2px solid #edf2f7; background-color: #f7fafc; }
-        td { font-size: 15px; color: #4a5568; padding: 16px; border-bottom: 1px solid #edf2f7; }
-        .input-tarif { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; color: #2d3748; width: 150px; outline: none; }
+        th { font-size: 14px; font-weight: 600; color: #718096; padding: 10px; border-bottom: 2px solid #edf2f7; background-color: #f7fafc; }
+        td { font-size: 14px; color: #4a5568; padding: 12px 10px; border-bottom: 1px solid #edf2f7; }
+        .input-tarif { padding: 6px 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; color: #2d3748; width: 120px; outline: none; }
         .input-tarif:focus { border-color: #3182ce; }
-        .btn-save { background-color: #3182ce; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.2s; }
+        .btn-save { background-color: #3182ce; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; white-space: nowrap; }
         .btn-save:hover { background-color: #2b6cb0; }
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; background-color: #2f855a; color: white; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: none; font-weight: 500; z-index: 999; }
+        .toast { position: fixed; bottom: 10px; right: 10px; left: 10px; padding: 12px 20px; background-color: #2f855a; color: white; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: none; font-weight: 500; z-index: 999; text-align: center; }
+        @media (min-width: 768px) {
+            .main-content { padding: 30px; }
+            .table-container { padding: 30px; }
+            .page-main-title { font-size: 22px; }
+            th { padding: 12px 16px; font-size: 14px; }
+            td { font-size: 15px; padding: 16px; }
+            .input-tarif { padding: 8px 12px; width: 150px; }
+            .btn-save { padding: 8px 15px; font-size: 13px; }
+            .toast { left: auto; }
+        }
     </style>
 </head>
 <body>

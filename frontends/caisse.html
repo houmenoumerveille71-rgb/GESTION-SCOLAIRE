@@ -5,7 +5,6 @@
     <title>Module de Caisse</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Style d'impression pour cacher le reste de la page et n'imprimer QUE le reçu */
         @media print {
             body * { display: none; }
             #receipt, #receipt * { display: block; }
@@ -18,14 +17,30 @@
             border: 2px dashed #000;
             background: #fff;
         }
+        @media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .receipt-box {
+                padding: 15px;
+                margin: 10px;
+            }
+            .no-print .card {
+                padding: 15px;
+            }
+        }
     </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body class="container mt-5">
-    
+<body class="container mt-4 mt-sm-5 px-3 px-sm-4">
+     
     <div class="no-print">
-        <h2>Enregistrement d'un paiement</h2>
-        <div class="mb-3">
-            <input type="text" id="search" class="form-control" placeholder="Rechercher un élève (nom, prénom, matricule)">
+        <h2 class="h3 h-sm-2 mb-4">Enregistrement d'un paiement</h2>
+        <div class="mb-3 mb-sm-3">
+            <input type="text" id="search" class="form-control form-control-lg" placeholder="Rechercher un élève (nom, prénom, matricule)">
         </div>
         
         <div id="eleve-info" class="card p-3 mb-3" style="display:none;">

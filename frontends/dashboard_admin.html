@@ -122,6 +122,48 @@
             border-radius: 8px;
             background: white;
         }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 15px 0;
+            }
+            .sidebar .logo-area {
+                padding: 0 10px 15px 10px;
+                font-size: 14px;
+                justify-content: center;
+            }
+            .sidebar .logo-area span {
+                margin-right: 0;
+            }
+            .sidebar-menu li a {
+                padding: 14px 10px;
+                justify-content: center;
+            }
+            .sidebar-menu li a span {
+                display: none;
+            }
+            .main-content {
+                margin-left: 60px;
+            }
+            .topbar {
+                padding: 0 15px;
+            }
+            .topbar .search-area {
+                width: auto;
+            }
+            .iframe-container {
+                padding: 10px;
+            }
+        }
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 50px;
+            }
+            .main-content {
+                margin-left: 50px;
+            }
+        }
     </style>
 </head>
 <body>
