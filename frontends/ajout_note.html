@@ -59,31 +59,23 @@
 </form>
 
 <script>
-// Charger la liste des élèves
-fetch("https://gestion-scolaire-production-5e27.up.railway.app/backends/eleves/read.php")
-.then(res => res.json())
-.then(data => {
-    const eleveSelect = document.getElementById("eleve_id");
-    data.forEach(eleve => {
-        const option = document.createElement("option");
-        option.value = eleve.id;
-        option.textContent = `${eleve.nom} ${eleve.prenom} (${eleve.matricule})`;
-        eleveSelect.appendChild(option);
+fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/classes/read.php')
+    .then(response => response.json())
+    .then(classes => {
+        const classeSelect = document.querySelector('select[name="code_classe"]');
+        classes.forEach(classe => {
+            const option = document.createElement('option');
+            
+            // CORRECTION ICI : On utilise classe.code_classe (ou le nom exact du champ dans votre API) au lieu de classe.id
+            option.value = classe.code_classe || classe.id; 
+            
+            option.textContent = classe.nom_classe;
+            classeSelect.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error('Erreur lors du chargement des classes:', error);
     });
-});
-
-// Charger la liste des matières
-fetch("https://gestion-scolaire-production-5e27.up.railway.app/backends/matieres/read.php")
-.then(res => res.json())
-.then(data => {
-    const matiereSelect = document.getElementById("matiere_id");
-    data.forEach(matiere => {
-        const option = document.createElement("option");
-        option.value = matiere.id;
-        option.textContent = matiere.nom_matiere;
-        matiereSelect.appendChild(option);
-    });
-});
 </script>
 
 </body>
