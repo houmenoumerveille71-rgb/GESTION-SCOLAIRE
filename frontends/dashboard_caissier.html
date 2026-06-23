@@ -71,7 +71,9 @@
 </div>
 <script>
 function checkAuth() {
-    fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/auth/check.php').then(r=>r.json()).then(d=>{
+    fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/auth/check.php', {
+        credentials: 'include'
+    }).then(r=>r.json()).then(d=>{
         if(d.authenticated && ['caisier','admin','comptable'].includes(d.user.role)){
             document.getElementById('auth-check').style.display='block';
             document.getElementById('user-nom').textContent=d.user.nom;
@@ -82,7 +84,10 @@ function checkAuth() {
     });
 }
 function logout(){
-    fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/auth/logout.php').then(()=>window.location='connexion.html');
+    fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/auth/logout.php', {
+        method: 'POST',
+        credentials: 'include'
+    }).then(()=>window.location='connexion.html');
 }
 </script>
 </body>
