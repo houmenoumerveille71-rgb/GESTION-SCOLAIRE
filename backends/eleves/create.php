@@ -1,89 +1,67 @@
 <?php
-// Charger la connexion
+// =========================================================================
+// 1. CONFIGURATION CORS POUR GITHUB PAGES (Indispensable)
+// =========================================================================
+header("Access-Control-Allow-Origin: https://houmenoumerveille71-rgb.github.io");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Content-Type: application/json; charset=UTF-8");
+
+// Gestion de la pré-vérification du navigateur
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+// =========================================================================
+// 2. CONNEXION À LA BASE DE DONNÉES
+// =========================================================================
 require "../config/connexion.php";
 
-// 1. Correction de la Notice : On vérifie si la session n'est pas déjà démarrée
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Récupération des données brutes envoyées en JSON par le Fetch
+$inputData = json_decode(file_get_contents("php://input"), true);
 
-require "../config/auth.php";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($inputData)) {
+    
+    // Récupération et nettoyage des valeurs
+    $matricule        = isset($inputData['matricule']) ? trim($inputData['matricule']) : '';
+    $nom              = isset($inputData['nom']) ? trim($inputData['nom']) : '';
+    $prenom           = isset($inputData['prenom']) ? trim($inputData['prenom']) : '';
+    $sexe             = isset($inputData['sexe']) ? trim($inputData['sexe']) : '';
+    $date_naissance   = isset($inputData['date_naissance']) ? trim($inputData['date_naissance']) : '';
+    $nom_parent       = isset($inputData['nom_parent']) ? trim($inputData['nom_parent']) : '';
+    $telephone_parent = isset($inputData['telephone_parent']) ? trim($inputData['telephone_parent']) : '';
+    $adresse          = isset($inputData['adresse']) ? trim($inputData['adresse']) : '';
+    $code_classe      = isset($inputData['code_classe']) ? trim($inputData['code_classe']) : '';
 
-// Check if user is logged in and is admin
-if (!estConnecte()) {
-    header("Location: ../../frontends/connexion.html");
-    exit;
-}
-if (!estAdmin()) {
-    header("Location: ../../frontends/acces_interdit.html");
-    exit;
-}
-
-if (isset($_POST['ajouter'])) {
-    // Récupération sécurisée des données (évite les warnings si un champ est vide)
-    $matricule        = isset($_POST['matricule']) ? trim($_POST['matricule']) : '';
-    $nom              = isset($_POST['nom']) ? trim($_POST['nom']) : '';
-    $prenom           = isset($_POST['prenom']) ? trim($_POST['prenom']) : '';
-    $sexe             = isset($_POST['sexe']) ? trim($_POST['sexe']) : '';
-    $date_naissance   = isset($_POST['date_naissance']) ? trim($_POST['date_naissance']) : '';
-    $nom_parent       = isset($_POST['nom_parent']) ? trim($_POST['nom_parent']) : '';
-    $telephone_parent = isset($_POST['telephone_parent']) ? trim($_POST['telephone_parent']) : '';
-    $adresse          = isset($_POST['adresse']) ? trim($_POST['adresse']) : '';
-    $code_classe      = isset($_POST['code_classe']) ? trim($_POST['code_classe']) : ''; // C'est ici que le warning se produisait
-
-    // Validation rapide
+    // Validation des champs obligatoires
     if (empty($nom) || empty($prenom) || empty($code_classe)) {
-        echo '<div class="alert alert-danger">Erreur : Le nom, le prénom et la classe sont obligatoires.</div>';
+        echo json_encode(['success' => false, 'message' => 'Le nom, le prénom et la classe sont obligatoires.']);
         exit;
     }
 
     try {
-        // Démarrer transaction
         $bd->beginTransaction();
 
-        // Requête insertion élève (Vérifie bien que ta table 'eleves' contient exactement ces colonnes)
+        // 1. Insertion de l'élève
         $q = $bd->prepare("
-            INSERT INTO eleves (
-                matricule,
-                nom,
-                prenom,
-                sexe,
-                date_naissance,
-                nom_parent,
-                telephone_parent,
-                adresse,
-                code_classe
-            )
+            INSERT INTO eleves (matricule, nom, prenom, sexe, date_naissance, nom_parent, telephone_parent, adresse, code_classe)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $q->execute([
-            $matricule,
-            $nom,
-            $prenom,
-            $sexe,
-            $date_naissance,
-            $nom_parent,
-            $telephone_parent,
-            $adresse,
-            $code_classe
-        ]);
+        $q->execute([$matricule, $nom, $prenom, $sexe, $date_naissance, $nom_parent, $telephone_parent, $adresse, $code_classe]);
 
         $eleve_id = $bd->lastInsertId();
 
-        // Récupérer les frais scolaires par défaut de la classe (Basé sur ton phpMyAdmin : 'montant_scolarite')
-        $fraisQuery = $bd->prepare("SELECT * FROM classes WHERE code_classe = ?");
+        // 2. Récupération des frais de scolarité associés à cette classe
+        $fraisQuery = $bd->prepare("SELECT montant_scolarite FROM classes WHERE code_classe = ?");
         $fraisQuery->execute([$code_classe]);
-        $frais_scolaire = $fraisQuery->fetchColumn();
+        $classe_data = $fraisQuery->fetch(PDO::FETCH_ASSOC);
 
-        // Si le montant n'est pas trouvé, on met 0 par défaut pour éviter un plantage
-        if ($frais_scolaire === false) {
-            $frais_scolaire = 0;
-        }
-
-        // Déterminer l'année scolaire en cours
+        // Si la classe ou le montant n'existe pas, on met 0 par défaut pour éviter un crash
+        $frais_scolaire = isset($classe_data['montant_scolarite']) ? $classe_data['montant_scolarite'] : 0;
         $annee_scolaire = date('Y');
 
-        // Insérer ou mettre à jour les frais scolaires pour l'élève (Vérifie que la table s'appelle bien 'frais_scolaires')
+        // 3. Insertion automatique dans la table des frais scolarité
         $fraisInsert = $bd->prepare("
             INSERT INTO frais_scolaires (eleve_id, montant_total, annee_scolaire)
             VALUES (?, ?, ?)
@@ -91,21 +69,21 @@ if (isset($_POST['ajouter'])) {
         ");
         $fraisInsert->execute([$eleve_id, $frais_scolaire, $annee_scolaire]);
 
-        // Valider la transaction
         $bd->commit();
 
-        // Redirection vers la liste
-        header("Location: ../../frontends/liste.html");
+        // Réponse positive renvoyée au JavaScript
+        echo json_encode(['success' => true, 'message' => 'Élève enregistré avec succès !']);
         exit;
 
     } catch (Exception $e) {
-        // Annuler les modifications en cas de bug SQL
         if ($bd->inTransaction()) {
             $bd->rollBack();
         }
-        echo '<div class="alert alert-danger">Erreur lors de l\'ajout: ' . htmlspecialchars($e->getMessage()) . '</div>';
+        echo json_encode(['success' => false, 'message' => 'Erreur SQL lors de l\'ajout : ' . $e->getMessage()]);
+        exit;
     }
 } else {
-    echo '<div class="alert alert-danger">Erreur : Le formulaire n'."'".'a pas été soumis correctement.</div>';
+    echo json_encode(['success' => false, 'message' => 'Aucune donnée reçue ou méthode invalide.']);
+    exit;
 }
 ?>
