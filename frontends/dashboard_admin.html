@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - ScolarTech</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/responsive.css">
@@ -13,194 +13,251 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #eef2f5;
+            background-color: #f8fafc; /* Fond gris/bleu ultra-léger et sobre */
             display: flex;
             min-height: 100vh;
-            color: #3e5569;
+            color: #334155;
+            overflow-x: hidden;
         }
 
+        /* --- SIDEBAR LOOK PRO & SOMBRE DISCRET --- */
         .sidebar {
             width: 260px;
             background-color: #ffffff;
             border-right: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            padding: 25px 0;
+            padding: 24px 0;
             position: fixed;
             height: 100vh;
+            z-index: 1040;
+            transition: transform 0.3s ease, width 0.3s ease;
         }
 
         .sidebar .logo-area {
-            padding: 0 25px 20px 25px;
-            font-size: 20px;
+            padding: 0 24px 24px 24px;
+            font-size: 18px;
             font-weight: 700;
-            color: #01579b;
+            color: #0f172a; /* Texte anthracite moderne */
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 16px;
+        }
+
+        .sidebar .logo-area i {
+            color: #475569;
+            font-size: 22px;
         }
 
         .sidebar-menu {
             list-style: none;
             display: flex;
             flex-direction: column;
+            gap: 4px;
+            padding: 0 12px;
         }
 
         .sidebar-menu li a {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 14px 25px;
-            color: #4a5568;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #64748b;
             text-decoration: none;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
+            border-radius: 8px;
             transition: all 0.2s ease;
         }
 
-        .sidebar-menu li a:hover, .sidebar-menu li a.active {
-            color: #3182ce;
-            background-color: #f7fafc;
+        .sidebar-menu li a:hover {
+            color: #0f172a;
+            background-color: #f1f5f9;
+        }
+
+        .sidebar-menu li a.active {
+            color: #0f172a;
+            background-color: #f1f5f9;
+            font-weight: 600;
         }
 
         .sidebar-menu li a i {
             font-size: 16px;
-            color: #718096;
             width: 20px;
             text-align: center;
+            color: #94a3b8;
+            transition: color 0.2s ease;
         }
 
         .sidebar-menu li a:hover i, .sidebar-menu li a.active i {
-            color: #3182ce;
+            color: #475569;
         }
 
+        /* --- MAIN CONTENT & TOPBAR --- */
         .main-content {
             margin-left: 260px;
             flex-grow: 1;
-            padding: 0;
             display: flex;
             flex-direction: column;
-        }
-
-        .page-main-title {
-            padding: 25px 0 15px 0;
-            font-size: 22px;
-            font-weight: 400;
-            color: #4f5f6f;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
 
         .topbar {
             background-color: #ffffff;
-            height: 70px;
+            height: 65px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 32px;
             border-bottom: 1px solid #e2e8f0;
         }
 
         .topbar .search-area {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #a0aec0;
-            width: 400px;
+            gap: 12px;
+            color: #94a3b8;
+            width: 350px;
         }
 
+        .topbar .search-area i {
+            font-size: 14px;
+        }
+
+        .topbar .search-area .form-control {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .topbar .search-area .form-control:focus {
+            background-color: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: none;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .user-profile i {
+            margin-right: 6px;
+            color: #64748b;
+        }
+
+        /* --- CONTAINER IFRAME ÉPURÉ --- */
         .iframe-container {
             flex: 1;
-            padding: 20px;
+            padding: 24px;
+            background-color: #f8fafc;
         }
 
         .iframe-container iframe {
             width: 100%;
             height: 100%;
-            border: none;
-            border-radius: 8px;
-            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
         }
 
-        @media (max-width: 768px) {
+        /* Boutons Toggler masqués par défaut sur PC */
+        .navbar-toggler-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #334155;
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(2px);
+            z-index: 1030;
+        }
+
+        /* --- ADAPTATION RESPONSIVE RESPONSIVE --- */
+        @media (max-width: 992px) {
             .sidebar {
-                width: 60px;
-                padding: 15px 0;
+                transform: translateX(-100%); /* Masqué à gauche sur tablette/mobile */
             }
-            .sidebar .logo-area {
-                padding: 0 10px 15px 10px;
-                font-size: 14px;
-                justify-content: center;
+            .sidebar.active {
+                transform: translateX(0);
             }
-            .sidebar .logo-area span {
-                margin-right: 0;
-            }
-            .sidebar-menu li a {
-                padding: 14px 10px;
-                justify-content: center;
-            }
-            .sidebar-menu li a span {
-                display: none;
+            .sidebar-overlay.active {
+                display: block;
             }
             .main-content {
-                margin-left: 60px;
+                margin-left: 0 !important;
+            }
+            .navbar-toggler-btn {
+                display: block;
             }
             .topbar {
-                padding: 0 15px;
+                padding: 0 16px;
             }
             .topbar .search-area {
-                width: auto;
+                display: none; /* Masque la barre de recherche sur mobile pour aérer */
             }
             .iframe-container {
-                padding: 10px;
-            }
-        }
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 50px;
-            }
-            .main-content {
-                margin-left: 50px;
+                padding: 12px;
             }
         }
     </style>
 </head>
 <body>
 
-    <button class="navbar-toggler" id="sidebarToggle" aria-label="Toggle navigation">
-        <i class="fa-solid fa-bars"></i>
-    </button>
-    
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="sidebar" id="sidebar">
         <div class="logo-area">
-            <span style="color: #3182ce;"><i class="fa-solid fa-circle-user"></i></span> Dashboard Admin
+            <span><i class="fa-solid fa-square-poll-horizontal"></i></span> ScolarTech
         </div>
 
         <ul class="sidebar-menu">
-            <li><a href="#" data-page="dashboard_content.html" class="active"><span>Dashboard</span> <i class="fa-solid fa-house"></i></a></li>
-            <li><a href="#" data-page="liste.html"><span>Gestion Élèves</span> <i class="fa-solid fa-users"></i></a></li>
-            <li><a href="#" data-page="scop.php"><span>Gestion des frais scolaire</span> <i class="fa-solid fa-layer-group"></i></a></li>
-            <li><a href="#" data-page="listepaiement.html"><span>Gestion paiement</span> <i class="fa-solid fa-desktop"></i></a></li>
-           
+            <li><a href="#" data-page="dashboard_content.html" class="active"><i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span></a></li>
+            <li><a href="#" data-page="liste.html"><i class="fa-solid fa-graduation-cap"></i> <span>Gestion Élèves</span></a></li>
+            <li><a href="#" data-page="scop.php"><i class="fa-solid fa-wallet"></i> <span>Frais Scolaires</span></a></li>
+            <li><a href="#" data-page="listepaiement.html"><i class="fa-solid fa-receipt"></i> <span>Gestion Paiements</span></a></li>
         </ul>
     </div>
 
     <div class="main-content">
         <div class="topbar">
-            <button class="navbar-toggler show-mobile" id="sidebarToggleMobile" aria-label="Toggle navigation">
+            <button class="navbar-toggler-btn" id="sidebarToggleMobile">
                 <i class="fa-solid fa-bars"></i>
             </button>
+            
             <div class="search-area">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Rechercher..." class="form-control">
+                <input type="text" placeholder="Recherche rapide..." class="form-control">
             </div>
+            
             <div class="user-profile">
-                <span><i class="fa-solid fa-user"></i> Administrateur</span>
-                <button onclick="logout()" class="btn btn-sm btn-outline-danger ms-3">Déconnexion</button>
+                <span><i class="fa-solid fa-circle-user"></i> Admin</span>
+                <button onclick="logout()" class="btn btn-sm btn-link text-danger text-decoration-none ms-3 fw-medium">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+                </button>
             </div>
         </div>
 
@@ -218,31 +275,20 @@
             });
     }
 
-    // Gestion du menu mobile
+    // Gestion fluide du menu Mobile
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
 
     function toggleSidebar() {
         sidebar.classList.toggle('active');
         sidebarOverlay.classList.toggle('active');
-        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    }
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', toggleSidebar);
     }
     
-    if (sidebarToggleMobile) {
-        sidebarToggleMobile.addEventListener('click', toggleSidebar);
-    }
-    
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-    }
+    if (sidebarToggleMobile) sidebarToggleMobile.addEventListener('click', toggleSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
 
-    // Fermer le sidebar quand on clique sur un lien (mobile)
+    // Changement dynamique des pages dans l'iframe
     document.addEventListener('DOMContentLoaded', function() {
         const links = document.querySelectorAll('.sidebar-menu a');
         const iframe = document.getElementById('content-frame');
@@ -257,20 +303,11 @@
                 const page = this.getAttribute('data-page');
                 iframe.src = page;
                 
-                // Fermer le sidebar sur mobile après clic
-                if (window.innerWidth <= 768) {
+                // Fermeture auto sur mobile
+                if (window.innerWidth <= 992) {
                     toggleSidebar();
                 }
             });
-        });
-        
-        // Gérer le redimensionnement
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
         });
     });
     </script>
