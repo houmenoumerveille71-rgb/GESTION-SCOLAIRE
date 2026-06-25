@@ -61,12 +61,16 @@ const RAILWAY_BASE_URL = 'https://gestion-scolaire-production-5e27.up.railway.ap
 // 1. CHARGEMENT DYNAMIQUE DES CLASSES DEPUIS RAILWAY
 // =========================================================================
 fetch(`${RAILWAY_BASE_URL}/backends/classes/read.php`)
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Erreur de chargement des classes');
+        return response.json();
+    })
     .then(classes => {
         const classeSelect = document.querySelector('select[name="code_classe"]');
+        classeSelect.innerHTML = '<option value="">Sélectionnez une classe</option>'; // On nettoie l'état initial
+        
         classes.forEach(classe => {
             const option = document.createElement('option');
-            // IMPORTANT : On envoie le code_classe (ex: CM2) ou l'identifiant selon ce que ton create.php attend
             option.value = classe.code_classe || classe.id; 
             option.textContent = classe.nom_classe;
             classeSelect.appendChild(option);
@@ -77,10 +81,10 @@ fetch(`${RAILWAY_BASE_URL}/backends/classes/read.php`)
     });
 
 // =========================================================================
-// 2. INTERCEPTION DE LA SOUMISSION ET ENVOI SÉCURISÉ EN ARRIÈRE-PLAN
+// 2. INTERCEPTION DE LA SOUMISSION ET ENVOI SÉCURISÉ EN JSON
 // =========================================================================
 document.getElementById('addStudentForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // 🔒 BLOQUE le rechargement sauvage et la redirection forcée !
+    e.preventDefault(); // 🔒 Empêche définitivement le rechargement sauvage de la page
     
     const alertDiv = document.getElementById('alert-message');
     const submitButton = this.querySelector('button[type="submit"]');
@@ -88,42 +92,46 @@ document.getElementById('addStudentForm').addEventListener('submit', function(e)
     submitButton.disabled = true;
     submitButton.textContent = 'Ajout en cours...';
 
-    // Extraction des données du formulaire
+    // Récupération propre des champs
     const formData = new FormData(this);
     const formObject = {};
     formData.forEach((value, key) => {
         formObject[key] = value;
     });
 
-    // Envoi propre au backend en format JSON
+    // Envoi Fetch vers ton create.php sur Railway
     fetch(`${RAILWAY_BASE_URL}/backends/eleves/create.php`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
+        headers: { 
+            'Content-Type': 'application/json' 
         },
         body: JSON.stringify(formObject)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Réponse serveur invalide');
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             alertDiv.className = 'alert alert-success';
             alertDiv.textContent = 'Élève ajouté avec succès !';
             alertDiv.classList.remove('d-none');
-            this.reset(); // Vide les champs du formulaire après succès
+            this.reset(); // Vide le formulaire
             
-            // Redirection douce vers la liste après 2 secondes
-            setTimeout(() => {
-                window.location.href = 'liste.html';
+            // Redirection fluide après 2 secondes
+            setTimeout(() => { 
+                window.location.href = 'liste.html'; 
             }, 2000);
         } else {
             alertDiv.className = 'alert alert-danger';
-            alertDiv.textContent = data.message || "Une erreur est survenue lors de l'ajout.";
+            alertDiv.textContent = data.message;
             alertDiv.classList.remove('d-none');
         }
     })
     .catch(error => {
+        console.error('Erreur d\'envoi:', error);
         alertDiv.className = 'alert alert-danger';
-        alertDiv.textContent = "Erreur réseau : Impossible de joindre le serveur Railway.";
+        alertDiv.textContent = "Erreur réseau : Impossible de joindre le serveur.";
         alertDiv.classList.remove('d-none');
     })
     .finally(() => {
