@@ -1,6 +1,6 @@
 <?php
 // =========================================================================
-// 1. AUTORISATIONS CORS & EN-TÊTES (Pour sécuriser les requêtes cross-origin)
+// 1. AUTORISATIONS CORS & EN-TÊTES
 // =========================================================================
 $allowed_origins = [
     'https://houmenoumerveille71-rgb.github.io',
@@ -19,7 +19,6 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Content-Type: application/json; charset=UTF-8");
 
-// Gestion de la requête de pré-vérification OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
@@ -40,21 +39,17 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Connexion à la base de données
-require "../config/connexion.php";
+// NOTE : Plus besoin de require "../config/connexion.php" si tu n'utilises plus la BD ici.
 
 // =========================================================================
-// 3. RÉCUPÉRATION ET SÉCURISATION DES DONNÉES SRAISIES
+// 3. RÉCUPÉRATION DES DONNÉES SAISIES
 // =========================================================================
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Méthode de requête non autorisée.']);
     exit;
 }
 
-// Lecture du flux JSON envoyé par ton code frontend actuel
 $inputData = json_decode(file_get_contents("php://input"), true);
-
-// Extraction des champs basés sur les attributs `name` du formulaire HTML
 $email_saisi = trim($inputData['email'] ?? $_POST['email'] ?? '');
 $mdp_saisi = $inputData['mot_de_passe'] ?? $_POST['mot_de_passe'] ?? '';
 
@@ -63,64 +58,82 @@ if (empty($email_saisi) || empty($mdp_saisi)) {
     exit;
 }
 
-try {
-    // =========================================================================
-    // 4. VÉRIFICATION DANS LA BASE DE DONNÉES
-    // =========================================================================
-    $stmt = $bd->prepare("SELECT id, nom, email, mot_de_passe, role FROM utilisateurs WHERE email = ? LIMIT 1");
-    $stmt->execute([$email_saisi]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+// =========================================================================
+// 4. CONFIGURATION DE TES IDENTIFIANTS (Modifie les valeurs ici ✍️)
+// =========================================================================
+$admin_email = "admin@ecole.com";
+$admin_mdp   = "Admin2026!"; // Ton mot de passe admin
 
-    // Si l'utilisateur n'existe pas ou que le mot de passe hashé ne correspond pas
-    if (!$user || !password_verify($mdp_saisi, $user['mot_de_passe'])) {
-        echo json_encode(['success' => false, 'message' => 'Identifiants ou mot de passe incorrect.']);
-        exit;
-    }
+$comptable_email = "comptable@ecole.com";
+$comptable_mdp   = "Compta2026!"; // Ton mot de passe comptable
 
-    // Enregistrement des données utilisateur dans la session PHP
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['user_nom'] = $user['nom'];
-    $_SESSION['user_email'] = $user['email'];
-    $_SESSION['user_role'] = $user['role'];
+$secretaire_email = "secretaire@ecole.com";
+$secretaire_mdp   = "Secret2026!"; // Ton mot de passe secrétaire
 
-    // =========================================================================
-    // 5. LOGIQUE DE ROUTAGE ET REDIRECTION PAR RÔLE
-    // =========================================================================
-    $baseUrl = 'https://houmenoumerveille71-rgb.github.io/GESTION-SCOLAIRE/frontends';
+$caissier_email = "caissier@ecole.com";
+$caissier_mdp   = "Caisse2026!"; // Ton mot de passe caissier
 
-    switch ($user['role']) {
-        case 'admin':
-            $redirectUrl = $baseUrl . '/dashboard_admin.html';
-            break;
-        case 'comptable':
-            $redirectUrl = $baseUrl . '/dashboard_comptable.html';
-            break;
-        case 'secretaire':
-        case 'secrétaire': // Gère l'éventuel accent dans ton champ de rôle
-            $redirectUrl = $baseUrl . '/dashboard_admin.html';
-            break;
-        case 'caissier':
-            $redirectUrl = $baseUrl . '/index.html';
-            break;
-        default:
-            $redirectUrl = $baseUrl . '/index.html';
-            break;
-    }
 
-    // Réponse de succès interceptée par ton fetch()
-    echo json_encode([
-        'success' => true,
-        'message' => 'Connexion réussie ! Redirection en cours...',
-        'redirect' => $redirectUrl,
-        'user' => [
-            'id' => $user['id'],
-            'nom' => $user['nom'],
-            'email' => $user['email'],
-            'role' => $user['role']
-        ]
-    ]);
+// Variable qui contiendra les infos du compte validé
+$user = null;
 
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Erreur critique serveur : ' . $e->getMessage()]);
+// =========================================================================
+// 5. VÉRIFICATION SANS BASE DE DONNÉES
+// =========================================================================
+if ($email_saisi === $admin_email && $mdp_saisi === $admin_mdp) {
+    $user = ['id' => 1, 'nom' => 'Directeur', 'email' => $admin_email, 'role' => 'admin'];
+} 
+define_role_comptable:
+if ($email_saisi === $comptable_email && $mdp_saisi === $comptable_mdp) {
+    $user = ['id' => 2, 'nom' => 'Service Comptabilité', 'email' => $comptable_email, 'role' => 'comptable'];
+} 
+define_role_secretaire:
+if ($email_saisi === $secretaire_email && $mdp_saisi === $secretaire_mdp) {
+    $user = ['id' => 3, 'nom' => 'Secrétariat Général', 'email' => $secretaire_email, 'role' => 'secretaire'];
+} 
+define_role_caissier:
+if ($email_saisi === $caissier_email && $mdp_saisi === $caissier_mdp) {
+    $user = ['id' => 4, 'nom' => 'Caisse', 'email' => $caissier_email, 'role' => 'caissier'];
 }
+
+// Si aucun compte ne correspond aux identifiants définis au-dessus
+if (!$user) {
+    echo json_encode(['success' => false, 'message' => 'Email ou mot de passe incorrect.']);
+    exit;
+}
+
+// Stockage en session PHP
+$_SESSION['user_id']    = $user['id'];
+$_SESSION['user_nom']   = $user['nom'];
+$_SESSION['user_email'] = $user['email'];
+$_SESSION['user_role']  = $user['role'];
+
+// =========================================================================
+// 6. ADRESSES DE REDIRECTION (Selon tes demandes précédentes)
+// =========================================================================
+$baseUrl = 'https://houmenoumerveille71-rgb.github.io/GESTION-SCOLAIRE/frontends';
+
+switch ($user['role']) {
+    case 'admin':
+        $redirectUrl = $baseUrl . '/dashboard_admin.html';
+        break;
+    case 'comptable':
+        $redirectUrl = $baseUrl . '/index.html';
+        break;
+    case 'secretaire':
+        $redirectUrl = $baseUrl . '/index.html';
+        break;
+    case 'caissier':
+        $redirectUrl = $baseUrl . '/index.html';
+        break;
+    
+}
+
+// Réponse JSON renvoyée au JavaScript de ta page de connexion
+echo json_encode([
+    'success' => true,
+    'message' => 'Connexion réussie ! Redirection en cours...',
+    'redirect' => $redirectUrl,
+    'user' => $user
+]);
 ?>
