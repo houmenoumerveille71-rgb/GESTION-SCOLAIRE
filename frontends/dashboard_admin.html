@@ -17,7 +17,7 @@
         }
 
         body {
-            background-color: #f8fafc; /* Fond gris/bleu ultra-léger et sobre */
+            background-color: #f8fafc;
             display: flex;
             min-height: 100vh;
             color: #334155;
@@ -42,7 +42,7 @@
             padding: 0 24px 24px 24px;
             font-size: 18px;
             font-weight: 700;
-            color: #0f172a; /* Texte anthracite moderne */
+            color: #0f172a;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -119,38 +119,13 @@
             border-bottom: 1px solid #e2e8f0;
         }
 
-        .topbar .search-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #94a3b8;
-            width: 350px;
-        }
-
-        .topbar .search-area i {
-            font-size: 14px;
-        }
-
-        .topbar .search-area .form-control {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            font-size: 14px;
-            padding: 6px 12px;
-            border-radius: 6px;
-        }
-
-        .topbar .search-area .form-control:focus {
-            background-color: #ffffff;
-            border-color: #cbd5e1;
-            box-shadow: none;
-        }
-
         .user-profile {
             display: flex;
             align-items: center;
             font-size: 14px;
             font-weight: 500;
             color: #334155;
+            margin-left: auto; /* Aligne le profil à droite maintenant que la recherche est retirée */
         }
 
         .user-profile i {
@@ -174,7 +149,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
         }
 
-        /* Boutons Toggler masqués par défaut sur PC */
         .navbar-toggler-btn {
             display: none;
             background: none;
@@ -196,10 +170,10 @@
             z-index: 1030;
         }
 
-        /* --- ADAPTATION RESPONSIVE RESPONSIVE --- */
+        /* --- ADAPTATION RESPONSIVE --- */
         @media (max-width: 992px) {
             .sidebar {
-                transform: translateX(-100%); /* Masqué à gauche sur tablette/mobile */
+                transform: translateX(-100%);
             }
             .sidebar.active {
                 transform: translateX(0);
@@ -215,9 +189,6 @@
             }
             .topbar {
                 padding: 0 16px;
-            }
-            .topbar .search-area {
-                display: none; /* Masque la barre de recherche sur mobile pour aérer */
             }
             .iframe-container {
                 padding: 12px;
@@ -248,11 +219,6 @@
                 <i class="fa-solid fa-bars"></i>
             </button>
             
-            <div class="search-area">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Recherche rapide..." class="form-control">
-            </div>
-            
             <div class="user-profile">
                 <span><i class="fa-solid fa-circle-user"></i> Admin</span>
                 <button onclick="logout()" class="btn btn-sm btn-link text-danger text-decoration-none ms-3 fw-medium">
@@ -275,7 +241,6 @@
             });
     }
 
-    // Gestion fluide du menu Mobile
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
@@ -288,7 +253,6 @@
     if (sidebarToggleMobile) sidebarToggleMobile.addEventListener('click', toggleSidebar);
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
 
-    // Changement dynamique des pages dans l'iframe
     document.addEventListener('DOMContentLoaded', function() {
         const links = document.querySelectorAll('.sidebar-menu a');
         const iframe = document.getElementById('content-frame');
@@ -303,7 +267,6 @@
                 const page = this.getAttribute('data-page');
                 iframe.src = page;
                 
-                // Fermeture auto sur mobile
                 if (window.innerWidth <= 992) {
                     toggleSidebar();
                 }
