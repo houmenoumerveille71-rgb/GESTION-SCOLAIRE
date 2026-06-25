@@ -97,10 +97,10 @@ try {
             break;
         case 'secretaire':
         case 'secrétaire': // Gère l'éventuel accent dans ton champ de rôle
-            $redirectUrl = $baseUrl . '/dashboard_secretaire.html';
+            $redirectUrl = $baseUrl . '/dashboard_admin.html';
             break;
         case 'caissier':
-            $redirectUrl = $baseUrl . '/dashboard_caissier.html';
+            $redirectUrl = $baseUrl . '/index.html';
             break;
         default:
             $redirectUrl = $baseUrl . '/index.html';
