@@ -21,13 +21,15 @@
 
 <h2 class="h3 h-sm-2 mb-4">Ajouter un élève</h2>
 
-<form action="https://gestion-scolaire-production-5e27.up.railway.app/backends/eleves/create.php" method="POST" enctype="multipart/form-data">
+<div id="alert-message" class="alert d-none" role="alert"></div>
+
+<form id="addStudentForm">
     
     <input type="text" name="matricule" class="form-control form-control-lg mb-3 mb-sm-2" placeholder="Matricule">
 
-    <input type="text" name="nom" class="form-control form-control-lg mb-3 mb-sm-2" placeholder="Nom">
+    <input type="text" name="nom" class="form-control form-control-lg mb-3 mb-sm-2" placeholder="Nom" required>
 
-    <input type="text" name="prenom" class="form-control form-control-lg mb-3 mb-sm-2" placeholder="Prénom">
+    <input type="text" name="prenom" class="form-control form-control-lg mb-3 mb-sm-2" placeholder="Prénom" required>
 
     <select name="sexe" class="form-control form-control-lg mb-3 mb-sm-2">
         <option value="M">Masculin</option>
@@ -42,24 +44,30 @@
 
     <textarea name="adresse" class="form-control form-control-lg mb-3 mb-sm-2" placeholder="Adresse"></textarea>
 
-    <select name="code_classe" class="form-control form-control-lg mb-3 mb-sm-2">
+    <select name="code_classe" class="form-control form-control-lg mb-3 mb-sm-2" required>
         <option value="">Sélectionnez une classe</option>
     </select>
 
-    <button type="submit" name="ajouter" class="btn btn-success btn-lg w-100 w-sm-auto">
+    <button type="submit" class="btn btn-success btn-lg w-100 w-sm-auto">
         Ajouter
     </button>
 
 </form>
 
 <script>
-fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/classes/read.php')
+const RAILWAY_BASE_URL = 'https://gestion-scolaire-production-5e27.up.railway.app';
+
+// =========================================================================
+// 1. CHARGEMENT DYNAMIQUE DES CLASSES DEPUIS RAILWAY
+// =========================================================================
+fetch(`${RAILWAY_BASE_URL}/backends/classes/read.php`)
     .then(response => response.json())
     .then(classes => {
         const classeSelect = document.querySelector('select[name="code_classe"]');
         classes.forEach(classe => {
             const option = document.createElement('option');
-            option.value = classe.id;
+            // IMPORTANT : On envoie le code_classe (ex: CM2) ou l'identifiant selon ce que ton create.php attend
+            option.value = classe.code_classe || classe.id; 
             option.textContent = classe.nom_classe;
             classeSelect.appendChild(option);
         });
@@ -67,6 +75,62 @@ fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/classes/
     .catch(error => {
         console.error('Erreur lors du chargement des classes:', error);
     });
+
+// =========================================================================
+// 2. INTERCEPTION DE LA SOUMISSION ET ENVOI SÉCURISÉ EN ARRIÈRE-PLAN
+// =========================================================================
+document.getElementById('addStudentForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // 🔒 BLOQUE le rechargement sauvage et la redirection forcée !
+    
+    const alertDiv = document.getElementById('alert-message');
+    const submitButton = this.querySelector('button[type="submit"]');
+    
+    submitButton.disabled = true;
+    submitButton.textContent = 'Ajout en cours...';
+
+    // Extraction des données du formulaire
+    const formData = new FormData(this);
+    const formObject = {};
+    formData.forEach((value, key) => {
+        formObject[key] = value;
+    });
+
+    // Envoi propre au backend en format JSON
+    fetch(`${RAILWAY_BASE_URL}/backends/eleves/create.php`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formObject)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alertDiv.className = 'alert alert-success';
+            alertDiv.textContent = 'Élève ajouté avec succès !';
+            alertDiv.classList.remove('d-none');
+            this.reset(); // Vide les champs du formulaire après succès
+            
+            // Redirection douce vers la liste après 2 secondes
+            setTimeout(() => {
+                window.location.href = 'liste.html';
+            }, 2000);
+        } else {
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.textContent = data.message || "Une erreur est survenue lors de l'ajout.";
+            alertDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        alertDiv.className = 'alert alert-danger';
+        alertDiv.textContent = "Erreur réseau : Impossible de joindre le serveur Railway.";
+        alertDiv.classList.remove('d-none');
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Ajouter';
+    });
+});
 </script>
 
 </body>
