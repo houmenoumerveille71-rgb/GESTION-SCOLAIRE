@@ -147,104 +147,45 @@ function telechargerRecu() {
     const nomEleve = document.getElementById('recu-nom').textContent.trim().replace(/\s+/g, '_');
     const numeroRecu = document.getElementById('recu-numero').textContent.trim();
 
-    // Cloner l'élément pour retirer proprement le bouton du PDF sans toucher à l'écran
+    // 1. Cloner le reçu
     const clone = element.cloneNode(true);
+    
+    // 2. Retirer le bouton du clone pour qu'il n'apparaisse pas sur le PDF
     const boutonClone = clone.querySelector('.btn-download');
     if (boutonClone) boutonClone.remove();
 
+    // 3. Forcer l'affichage sur le clone et le rendre invisible mais calculable à l'écran
+    clone.style.display = 'block';
+    clone.style.position = 'absolute';
+    clone.style.left = '-9999px';
+    clone.style.top = '-9999px';
+    
+    // 4. L'attacher temporairement au document pour que le navigateur calcule sa hauteur/largeur
+    document.body.appendChild(clone);
+
     const options = {
-        margin:       10,
+        margin:       15,
         filename:     `Recu_${numeroRecu}_${nomEleve}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { 
             scale: 2, 
             useCORS: true,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            scrollY: 0,
+            scrollX: 0
         },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Génération à partir du clone
-    html2pdf().set(options).from(clone).save().catch(err => console.error(err));
+    // 5. Générer le PDF à partir du clone bien visible pour le moteur de rendu
+    html2pdf().set(options).from(clone).save().then(() => {
+        // 6. Supprimer le clone du DOM après le téléchargement
+        document.body.removeChild(clone);
+    }).catch(err => {
+        console.error(err);
+        document.body.removeChild(clone);
+    });
 }
-
-document.getElementById('search').addEventListener('input', function() {    
-    clearTimeout(searchTimeout);    
-    if (this.value.trim() === "") {        
-        document.getElementById('eleve-info').style.display = 'none';        
-        document.getElementById('paiement-form').style.display = 'none';        
-        document.getElementById('receipt').style.display = 'none';        
-        return;    
-    }
-
-    searchTimeout = setTimeout(() => {        
-        fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/eleves/read.php?q=' + encodeURIComponent(this.value))            
-            .then(res => res.json())            
-            .then(data => {                
-                if (Array.isArray(data) && data.length > 0) {                    
-                    let eleve = data[0];                                        
-                    document.getElementById('receipt').style.display = 'none';                                        
-                    document.getElementById('eleve-id').value = eleve.id;                    
-                    document.getElementById('eleve-nom').textContent = (eleve.nom || '').toUpperCase() + ' ' + (eleve.prenom || '');                    
-                    document.getElementById('eleve-classe').textContent = eleve.nom_classe ;                                        
-                    
-                    let totalAttendu = eleve.total_attendu ?? 0;
-                    let totalPaye = eleve.total_paye ?? 0;
-                    let resteAPayer = eleve.reste_a_payer ?? (totalAttendu - totalPaye);
-
-                    document.getElementById('eleve-total').setAttribute('data-val', totalAttendu);                    
-                    document.getElementById('eleve-paye').setAttribute('data-val', totalPaye);                                        
-                    
-                    document.getElementById('eleve-total').textContent = formatArgent(totalAttendu);                    
-                    document.getElementById('eleve-paye').textContent = formatArgent(totalPaye);                    
-                    document.getElementById('eleve-reste').textContent = formatArgent(resteAPayer);                                        
-                    
-                    document.getElementById('eleve-info').style.display = 'block';                    
-                    document.getElementById('paiement-form').style.display = 'block';                
-                } else {                    
-                    document.getElementById('eleve-info').style.display = 'none';                    
-                    document.getElementById('paiement-form').style.display = 'none';                    
-                    document.getElementById('receipt').style.display = 'none';                
-                }            
-            })            
-            .catch(err => console.error("Erreur de recherche:", err));    
-    }, 400);
-});
-
-document.getElementById('paiement-form').addEventListener('submit', function(e) {    
-    e.preventDefault();    
-    const formData = new FormData();    
-    formData.append('eleve_id', document.getElementById('eleve-id').value);    
-    formData.append('montant', document.getElementById('montant').value);        
-    
-    fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/paiements/create.php', { method: 'POST', body: formData })        
-        .then(res => res.json())        
-        .then(res => {            
-            if (res.success) {                
-                document.getElementById('recu-numero').textContent = res.data.numero_recu;                
-                document.getElementById('recu-date').textContent = res.data.date_paiement;                
-                document.getElementById('recu-nom').textContent = document.getElementById('eleve-nom').textContent;                
-                document.getElementById('recu-classe').textContent = document.getElementById('eleve-classe').textContent;                
-                document.getElementById('recu-montant').textContent = formatArgent(res.data.montant_paye);                
-                document.getElementById('recu-reste').textContent = formatArgent(res.data.reste_a_payer);                
-                document.getElementById('recu-caissier').textContent = res.data.caissier;                                
-                
-                document.getElementById('eleve-reste').textContent = formatArgent(res.data.reste_a_payer);                                
-                let ancienPaye = parseFloat(document.getElementById('eleve-paye').getAttribute('data-val')) || 0;                
-                let nouveauVersement = parseFloat(document.getElementById('montant').value) || 0;                
-                let cumulPaye = ancienPaye + nouveauVersement;                                
-                document.getElementById('eleve-paye').setAttribute('data-val', cumulPaye);                
-                document.getElementById('eleve-paye').textContent = formatArgent(cumulPaye);                                
-                
-                document.getElementById('receipt').style.display = 'block';                
-                document.getElementById('montant').value = "";                
-                document.getElementById('paiement-form').style.display = 'none';            
-            } else {                
-                alert(res.message);            
-            }        
-        })        
-        .catch(err => console.error("Erreur d'enregistrement:", err));
-});
 </script> <!-- La balise manquante a été rajoutée ici -->
 </body>
 </html>
