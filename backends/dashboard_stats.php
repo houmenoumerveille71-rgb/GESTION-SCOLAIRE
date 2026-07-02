@@ -31,30 +31,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // =========================================================================
 require "config/connexion.php";
 
+$totalEleves = 0;
+$totalRecette = 0;
+$errors = [];
+
+// 1. Requête pour les élèves (isolée)
 try {
-    // 1. Compter le nombre total d'élèves
     $stmtEleves = $bd->query("SELECT COUNT(*) as total_eleves FROM eleves");
     $resEleves = $stmtEleves->fetch(PDO::FETCH_ASSOC);
     $totalEleves = $resEleves['total_eleves'] ?? 0;
+} catch (Exception $e) {
+    $errors[] = "Erreur élèves: " . $e->getMessage();
+}
 
-    // 2. Calculer le total encaissé depuis les frais scolaires / paiements
-    // Note : Remplace "frais_scolaires" et "montant_verse" par tes vrais noms de table/colonne si nécessaire
-    $stmtEncaisse = $bd->query("SELECT SUM(montant_verse) as total_recette FROM frais_scolaires");
+// 2. Requête pour les recettes (isolée)
+try {
+    // Si l'erreur persiste, tu pourras modifier 'frais_scolaires' ou 'montant' ici
+    $stmtEncaisse = $bd->query("SELECT SUM(montant) as total_recette FROM frais_scolaires");
     $resEncaisse = $stmtEncaisse->fetch(PDO::FETCH_ASSOC);
     $totalRecette = $resEncaisse['total_recette'] ?? 0;
-
-    // Réponse JSON
-    echo json_encode([
-        'success' => true,
-        'total_eleves' => intval($totalEleves),
-        'total_encaisse' => floatval($totalRecette)
-    ]);
-
 } catch (Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erreur SQL : ' . $e->getMessage()
-    ]);
+    $errors[] = "Erreur recettes: " . $e->getMessage();
 }
+
+// Réponse JSON (success est vrai si au moins les élèves fonctionnent)
+echo json_encode([
+    'success' => (count($errors) === 0),
+    'total_eleves' => intval($totalEleves),
+    'total_encaisse' => floatval($totalRecette),
+    'message' => implode(" | ", $errors)
+]);
 exit;
 ?>
