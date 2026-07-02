@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <title>Module de Caisse</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- Ajout de la bibliothèque html2pdf.js pour la génération du PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         @media print {
             body * { display: none; }
             #receipt, #receipt * { display: block; }
-            .btn-print { display: none !important; }
+            .btn-download { display: none !important; }
         }
         .receipt-box {
             max-width: 500px;
@@ -37,7 +42,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="container mt-4 mt-sm-5 px-3 px-sm-4">
-     
+
     <div class="no-print">
         <div class="row align-items-center mb-4">
             <div class="col-12 col-sm-8">
@@ -49,7 +54,7 @@
                 </a>
             </div>
         </div>
-        
+                
         <div class="card mb-3">
             <div class="card-body">
                 <div class="mb-3">
@@ -58,7 +63,7 @@
                 </div>
             </div>
         </div>
-        
+                
         <div id="eleve-info" class="card mb-3" style="display:none;">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Informations de l'élève</h5>
@@ -69,8 +74,7 @@
                         <p class="mb-1"><strong>Élève :</strong></p>
                         <p class="fs-5" id="eleve-nom"></p>
                     </div>
-                    <div class="col-12 col-md-6">
-                        <p class="mb-1"><strong>Classe :</strong></p>
+                    <div class="col-12 col-md-6">                        <p class="mb-1"><strong>Classe :</strong></p>
                         <p class="fs-5" id="eleve-classe"></p>
                     </div>
                     <div class="col-6 col-md-3">
@@ -88,7 +92,7 @@
                 </div>
             </div>
         </div>
-        
+                
         <form id="paiement-form" style="display:none;" class="mb-4">
             <input type="hidden" id="eleve-id">
             <div class="card">
@@ -107,7 +111,8 @@
             </div>
         </form>
     </div>
-    
+
+    <!-- Le reçu HTML -->
     <div id="receipt" style="display:none;" class="receipt-box">
         <div class="text-center mb-3">
             <h3>REÇU DE PAIEMENT</h3>
@@ -128,100 +133,113 @@
                 <div style="margin-top: 50px; border-top: 1px dashed #ccc;"></div>
             </div>
         </div>
+        <!-- Bouton modifié pour Télécharger en PDF -->
         <div class="text-center mt-4">
-            <button onclick="window.print()" class="btn btn-primary btn-print">🖨️ Imprimer le reçu</button>
+            <button onclick="telechargerRecu()" class="btn btn-success btn-download">
+                <i class="fa-solid fa-file-pdf"></i> Télécharger le reçu
+            </button>
         </div>
     </div>
 
 <script>
 let searchTimeout;
-
-function formatArgent(montant) {
+function formatArgent(montant) {    
     return new Intl.NumberFormat('fr-FR').format(montant) + " FCFA";
 }
 
-document.getElementById('search').addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    if (this.value.trim() === "") {
-        document.getElementById('eleve-info').style.display = 'none';
-        document.getElementById('paiement-form').style.display = 'none';
-        document.getElementById('receipt').style.display = 'none';
-        return;
+// Fonction pour capturer le reçu et déclencher le téléchargement du PDF
+function telechargerRecu() {
+    const element = document.getElementById('receipt');
+    const bouton = document.querySelector('.btn-download');
+    const nomEleve = document.getElementById('recu-nom').textContent.trim().replace(/\s+/g, '_');
+    const numeroRecu = document.getElementById('recu-numero').textContent.trim();
+
+    // On cache temporairement le bouton à l'intérieur du reçu pour qu'il n'apparaisse pas sur le PDF
+    bouton.style.display = 'none';
+
+    const options = {
+        margin:       10,
+        filename:     `Recu_${numeroRecu}_${nomEleve}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Génération et téléchargement
+    html2pdf().set(options).from(element).save().then(() => {
+        // On réaffiche le bouton une fois le téléchargement lancé
+        bouton.style.display = 'inline-block';
+    });
+}
+
+document.getElementById('search').addEventListener('input', function() {    
+    clearTimeout(searchTimeout);    
+    if (this.value.trim() === "") {        
+        document.getElementById('eleve-info').style.display = 'none';        
+        document.getElementById('paiement-form').style.display = 'none';        
+        document.getElementById('receipt').style.display = 'none';        
+        return;    
     }
 
-    searchTimeout = setTimeout(() => {
-        // Appelle ton script read.php qu'on a configuré ensemble
-        fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/eleves/read.php?q=' + encodeURIComponent(this.value))
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    let eleve = data[0];
-                    
-                    // On cache l'ancien reçu si on fait une nouvelle recherche
-                    document.getElementById('receipt').style.display = 'none';
-                    
-                    document.getElementById('eleve-id').value = eleve.id;
-                    document.getElementById('eleve-nom').textContent = (eleve.nom || '').toUpperCase() + ' ' + (eleve.prenom || '');
-                    document.getElementById('eleve-classe').textContent = eleve.nom_classe ;
-                    
-                    // Stockage des valeurs numériques brutes dans des attributs data- pour les calculs JS futurs
-                    document.getElementById('eleve-total').setAttribute('data-val', eleve.total_attendu);
-                    document.getElementById('eleve-paye').setAttribute('data-val', eleve.total_paye);
-                    
-                    // Affichage propre formaté avec "FCFA"
-                    document.getElementById('eleve-total').textContent = formatArgent(eleve.total_attendu);
-                    document.getElementById('eleve-paye').textContent = formatArgent(eleve.total_paye);
-                    document.getElementById('eleve-reste').textContent = formatArgent(eleve.reste_a_payer);
-                    
-                    document.getElementById('eleve-info').style.display = 'block';
-                    document.getElementById('paiement-form').style.display = 'block';
-                } else {
-                    document.getElementById('eleve-info').style.display = 'none';
-                    document.getElementById('paiement-form').style.display = 'none';
-                    document.getElementById('receipt').style.display = 'none';
-                }
-            })
-            .catch(err => console.error("Erreur de recherche:", err));
+    searchTimeout = setTimeout(() => {        
+        fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/eleves/read.php?q=' + encodeURIComponent(this.value))            
+            .then(res => res.json())            
+            .then(data => {                
+                if (Array.isArray(data) && data.length > 0) {                    
+                    let eleve = data[0];                                        
+                    document.getElementById('receipt').style.display = 'none';                                        
+                    document.getElementById('eleve-id').value = eleve.id;                    
+                    document.getElementById('eleve-nom').textContent = (eleve.nom || '').toUpperCase() + ' ' + (eleve.prenom || '');                    
+                    document.getElementById('eleve-classe').textContent = eleve.nom_classe ;                                        
+                    document.getElementById('eleve-total').setAttribute('data-val', eleve.total_attendu);                    
+                    document.getElementById('eleve-paye').setAttribute('data-val', eleve.total_paye);                                        
+                    document.getElementById('eleve-total').textContent = formatArgent(eleve.total_attendu);                    
+                    document.getElementById('eleve-paye').textContent = formatArgent(eleve.total_paye);                    
+                    document.getElementById('eleve-reste').textContent = formatArgent(eleve.reste_a_payer);                                        
+                    document.getElementById('eleve-info').style.display = 'block';                    
+                    document.getElementById('paiement-form').style.display = 'block';                
+                } else {                    
+                    document.getElementById('eleve-info').style.display = 'none';                    
+                    document.getElementById('paiement-form').style.display = 'none';                    
+                    document.getElementById('receipt').style.display = 'none';                
+                }            
+            })            
+            .catch(err => console.error("Erreur de recherche:", err));    
     }, 400);
 });
 
-document.getElementById('paiement-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('eleve_id', document.getElementById('eleve-id').value);
-    formData.append('montant', document.getElementById('montant').value);
+document.getElementById('paiement-form').addEventListener('submit', function(e) {    
+    e.preventDefault();    
+    const formData = new FormData();    
+    formData.append('eleve_id', document.getElementById('eleve-id').value);    
+    formData.append('montant', document.getElementById('montant').value);        
     
-    fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/paiements/create.php', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                // Injection des données reçues du PHP directement dans le reçu
-                document.getElementById('recu-numero').textContent = res.data.numero_recu;
-                document.getElementById('recu-date').textContent = res.data.date_paiement;
-                document.getElementById('recu-nom').textContent = document.getElementById('eleve-nom').textContent;
-                document.getElementById('recu-classe').textContent = document.getElementById('eleve-classe').textContent;
-                document.getElementById('recu-montant').textContent = formatArgent(res.data.montant_paye);
-                document.getElementById('recu-reste').textContent = formatArgent(res.data.reste_a_payer);
-                document.getElementById('recu-caissier').textContent = res.data.caissier;
+    fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/paiements/create.php', { method: 'POST', body: formData })        
+        .then(res => res.json())        
+        .then(res => {            
+            if (res.success) {                
+                document.getElementById('recu-numero').textContent = res.data.numero_recu;                
+                document.getElementById('recu-date').textContent = res.data.date_paiement;                
+                document.getElementById('recu-nom').textContent = document.getElementById('eleve-nom').textContent;                
+                document.getElementById('recu-classe').textContent = document.getElementById('eleve-classe').textContent;                
+                document.getElementById('recu-montant').textContent = formatArgent(res.data.montant_paye);                
+                document.getElementById('recu-reste').textContent = formatArgent(res.data.reste_a_payer);                
+                document.getElementById('recu-caissier').textContent = res.data.caissier;                                
                 
-                // MISE À JOUR EN DIRECT DE L'ÉCRAN DE SAISIE
-                document.getElementById('eleve-reste').textContent = formatArgent(res.data.reste_a_payer);
+                document.getElementById('eleve-reste').textContent = formatArgent(res.data.reste_a_payer);                                
+                let ancienPaye = parseFloat(document.getElementById('eleve-paye').getAttribute('data-val')) || 0;                
+                let nouveauVersement = parseFloat(document.getElementById('montant').value) || 0;                
+                let cumulPaye = ancienPaye + nouveauVersement;                                
+                document.getElementById('eleve-paye').setAttribute('data-val', cumulPaye);                
+                document.getElementById('eleve-paye').textContent = formatArgent(cumulPaye);                                
                 
-                let ancienPaye = parseFloat(document.getElementById('eleve-paye').getAttribute('data-val')) || 0;
-                let nouveauVersement = parseFloat(document.getElementById('montant').value) || 0;
-                let cumulPaye = ancienPaye + nouveauVersement;
-                
-                document.getElementById('eleve-paye').setAttribute('data-val', cumulPaye);
-                document.getElementById('eleve-paye').textContent = formatArgent(cumulPaye);
-                
-                // Afficher le reçu et réinitialiser le formulaire de versement
-                document.getElementById('receipt').style.display = 'block';
-                document.getElementById('montant').value = "";
-                document.getElementById('paiement-form').style.display = 'none';
-            } else {
-                alert(res.message);
-            }
-        })
+                document.getElementById('receipt').style.display = 'block';                
+                document.getElementById('montant').value = "";                
+                document.getElementById('paiement-form').style.display = 'none';            
+            } else {                
+                alert(res.message);            
+            }        
+        })        
         .catch(err => console.error("Erreur d'enregistrement:", err));
 });
 </script>
