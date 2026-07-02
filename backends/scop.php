@@ -1,6 +1,6 @@
 <?php
 // =========================================================================
-// 1. GESTION STRICTE DU CORS (DOIT ÊTRE AU TOUT DÉBUT SANS AUCUN CARACTÈRE AVANT)
+// 1. GESTION STRICTE DU CORS (DOIT ÊTRE AU TOUT DÉBUT SANS AUN CARACTÈRE AVANT)
 // =========================================================================
 
 $allowed_origins = [
