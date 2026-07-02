@@ -38,8 +38,8 @@ try {
     $totalEleves = $resEleves['total_eleves'] ?? 0;
 
     // 2. Calculer le total encaissé depuis les frais scolaires / paiements
-    // Note : Remplace "frais_scolaires" et "montant_paye" par tes vrais noms de table/colonne si nécessaire
-    $stmtEncaisse = $bd->query("SELECT SUM(montant_paye) as total_recette FROM frais_scolaires");
+    // Note : Remplace "frais_scolaires" et "montant_verse" par tes vrais noms de table/colonne si nécessaire
+    $stmtEncaisse = $bd->query("SELECT SUM(montant_verse) as total_recette FROM frais_scolaires");
     $resEncaisse = $stmtEncaisse->fetch(PDO::FETCH_ASSOC);
     $totalRecette = $resEncaisse['total_recette'] ?? 0;
 
