@@ -110,20 +110,24 @@
     <script>
     async function loadStats() {
         try {
-            // Ajout des credentials pour envoyer la session PHP (si existante) à Railway
             const response = await fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/dashboard_stats.php', {
                 method: 'GET',
                 credentials: 'include'
             });
             const data = await response.json();
             
+            // On traite le nombre d'élèves indépendamment de l'état global du script PHP
+            if (data.total_eleves !== undefined) {
+                document.getElementById('total-eleves').textContent = new Intl.NumberFormat('fr-FR').format(data.total_eleves);
+            }
+
             if (data.success) {
-                document.getElementById('total-eleves').textContent = new Intl.NumberFormat('fr-FR').format(data.total_eleves ?? 0);
+                // Si tout est au vert côté serveur
                 document.getElementById('total-encaisse').textContent = new Intl.NumberFormat('fr-FR').format(data.total_encaisse ?? 0) + ' FCFA';
             } else {
-                console.error("Erreur renvoyée par le serveur :", data.message);
-                document.getElementById('total-eleves').textContent = "0";
-                document.getElementById('total-encaisse').textContent = "0 FCFA";
+                // Si le serveur a renvoyé l'erreur SQL sur une table/colonne
+                console.error("Erreur SQL reçue :", data.message);
+                document.getElementById('total-encaisse').textContent = "Erreur Col.";
             }
         } catch (error) {
             console.error('Impossible de joindre l\'API dashboard_stats.php :', error);
