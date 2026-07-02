@@ -1,34 +1,40 @@
 <?php
 // =========================================================================
-// 1. EN-TÊTES CORS & CONFIGURATION
+// 1. GESTION STRICTE DU CORS (DOIT ÊTRE AU TOUT DÉBUT SANS AUCUN CARACTÈRE AVANT)
 // =========================================================================
+
 $allowed_origins = [
     'https://houmenoumerveille71-rgb.github.io',
     'https://gestion-scolaire-production-5e27.up.railway.app',
     'http://localhost',
     'http://127.0.0.1'
 ];
+
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
 if (in_array($origin, $allowed_origins, true)) {
     header("Access-Control-Allow-Origin: $origin");
 } else {
     header("Access-Control-Allow-Origin: https://houmenoumerveille71-rgb.github.io");
 }
+
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Origin, Accept");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 
-// Chargement de la connexion à la base de données
-require "../config/connexion.php";
-
-// Gestion du Preflight OPTIONS
+// Gestion immédiate du Preflight OPTIONS (avant d'inclure d'autres fichiers)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
 // =========================================================================
-// 2. ACTION : CHARGEMENT DES CLASSES (GET)
+// 2. CONFIGURATION ET CONNEXION
+// =========================================================================
+require "../config/connexion.php";
+
+// =========================================================================
+// 3. ACTION : CHARGEMENT DES CLASSES (GET)
 // =========================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_classes') {
     header("Content-Type: application/json; charset=UTF-8");
@@ -43,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
 }
 
 // =========================================================================
-// 3. ACTION : MISE À JOUR DU TARIF (POST)
+// 4. ACTION : MISE À JOUR DU TARIF (POST)
 // =========================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_tarif') {
     header("Content-Type: application/json; charset=UTF-8");
