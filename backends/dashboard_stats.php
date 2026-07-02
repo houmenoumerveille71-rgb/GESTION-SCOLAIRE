@@ -46,7 +46,7 @@ try {
 
 // 2. Requête pour les recettes (Mise à jour avec la table 'paiement' et la colonne 'montant_verse')
 try {
-    $stmtEncaisse = $bd->query("SELECT SUM(montant_verse) as total_recette FROM Paiements");
+    $stmtEncaisse = $bd->query("SELECT SUM(montant_verse) as total_recette FROM paiements");
     $resEncaisse = $stmtEncaisse->fetch(PDO::FETCH_ASSOC);
     $totalRecette = $resEncaisse['total_recette'] ?? 0;
 } catch (Exception $e) {
