@@ -11,7 +11,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        /* Nettoyage du @media print qui masquait tout le contenu lors de la génération */
         .receipt-box {
             max-width: 500px;
             margin: 20px auto;
@@ -145,12 +144,13 @@ function formatArgent(montant) {
 
 function telechargerRecu() {
     const element = document.getElementById('receipt');
-    const bouton = document.querySelector('.btn-download');
     const nomEleve = document.getElementById('recu-nom').textContent.trim().replace(/\s+/g, '_');
     const numeroRecu = document.getElementById('recu-numero').textContent.trim();
 
-    // On cache proprement le bouton pour éviter qu'il s'imprime
-    bouton.style.visibility = 'hidden';
+    // Cloner l'élément pour retirer proprement le bouton du PDF sans toucher à l'écran
+    const clone = element.cloneNode(true);
+    const boutonClone = clone.querySelector('.btn-download');
+    if (boutonClone) boutonClone.remove();
 
     const options = {
         margin:       10,
@@ -164,13 +164,8 @@ function telechargerRecu() {
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // On lance la génération sur l'élément visible à l'écran
-    html2pdf().set(options).from(element).save().then(() => {
-        bouton.style.visibility = 'visible';
-    }).catch(err => {
-        console.error(err);
-        bouton.style.visibility = 'visible';
-    });
+    // Génération à partir du clone
+    html2pdf().set(options).from(clone).save().catch(err => console.error(err));
 }
 
 document.getElementById('search').addEventListener('input', function() {    
@@ -192,11 +187,18 @@ document.getElementById('search').addEventListener('input', function() {
                     document.getElementById('eleve-id').value = eleve.id;                    
                     document.getElementById('eleve-nom').textContent = (eleve.nom || '').toUpperCase() + ' ' + (eleve.prenom || '');                    
                     document.getElementById('eleve-classe').textContent = eleve.nom_classe ;                                        
-                    document.getElementById('eleve-total').setAttribute('data-val', eleve.total_attendu);                    
-                    document.getElementById('eleve-paye').setAttribute('data-val', eleve.total_paye);                                        
-                    document.getElementById('eleve-total').textContent = formatArgent(eleve.total_attendu);                    
-                    document.getElementById('eleve-paye').textContent = formatArgent(eleve.total_paye);                    
-                    document.getElementById('eleve-reste').textContent = formatArgent(eleve.reste_a_payer);                                        
+                    
+                    let totalAttendu = eleve.total_attendu ?? 0;
+                    let totalPaye = eleve.total_paye ?? 0;
+                    let resteAPayer = eleve.reste_a_payer ?? (totalAttendu - totalPaye);
+
+                    document.getElementById('eleve-total').setAttribute('data-val', totalAttendu);                    
+                    document.getElementById('eleve-paye').setAttribute('data-val', totalPaye);                                        
+                    
+                    document.getElementById('eleve-total').textContent = formatArgent(totalAttendu);                    
+                    document.getElementById('eleve-paye').textContent = formatArgent(totalPaye);                    
+                    document.getElementById('eleve-reste').textContent = formatArgent(resteAPayer);                                        
+                    
                     document.getElementById('eleve-info').style.display = 'block';                    
                     document.getElementById('paiement-form').style.display = 'block';                
                 } else {                    
@@ -243,6 +245,6 @@ document.getElementById('paiement-form').addEventListener('submit', function(e) 
         })        
         .catch(err => console.error("Erreur d'enregistrement:", err));
 });
-</script>
+</script> <!-- La balise manquante a été rajoutée ici -->
 </body>
 </html>
