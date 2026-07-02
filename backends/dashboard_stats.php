@@ -35,7 +35,7 @@ $totalEleves = 0;
 $totalRecette = 0;
 $errors = [];
 
-// 1. Requête pour les élèves (isolée)
+// 1. Requête pour les élèves
 try {
     $stmtEleves = $bd->query("SELECT COUNT(*) as total_eleves FROM eleves");
     $resEleves = $stmtEleves->fetch(PDO::FETCH_ASSOC);
@@ -44,17 +44,16 @@ try {
     $errors[] = "Erreur élèves: " . $e->getMessage();
 }
 
-// 2. Requête pour les recettes (isolée)
+// 2. Requête pour les recettes (Mise à jour avec la table 'paiement' et la colonne 'montant_verse')
 try {
-    // Si l'erreur persiste, tu pourras modifier 'frais_scolaires' ou 'montant' ici
-    $stmtEncaisse = $bd->query("SELECT SUM(montant) as total_recette FROM frais_scolaires");
+    $stmtEncaisse = $bd->query("SELECT SUM(montant_verse) as total_recette FROM paiement");
     $resEncaisse = $stmtEncaisse->fetch(PDO::FETCH_ASSOC);
     $totalRecette = $resEncaisse['total_recette'] ?? 0;
 } catch (Exception $e) {
     $errors[] = "Erreur recettes: " . $e->getMessage();
 }
 
-// Réponse JSON (success est vrai si au moins les élèves fonctionnent)
+// Réponse JSON
 echo json_encode([
     'success' => (count($errors) === 0),
     'total_eleves' => intval($totalEleves),
