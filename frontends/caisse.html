@@ -7,15 +7,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="css/responsive.css">
     
-    <!-- Ajout de la bibliothèque html2pdf.js pour la génération du PDF -->
+    <!-- Bibliothèque html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        @media print {
-            body * { display: none; }
-            #receipt, #receipt * { display: block; }
-            .btn-download { display: none !important; }
-        }
+        /* Nettoyage du @media print qui masquait tout le contenu lors de la génération */
         .receipt-box {
             max-width: 500px;
             margin: 20px auto;
@@ -74,7 +70,8 @@
                         <p class="mb-1"><strong>Élève :</strong></p>
                         <p class="fs-5" id="eleve-nom"></p>
                     </div>
-                    <div class="col-12 col-md-6">                        <p class="mb-1"><strong>Classe :</strong></p>
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1"><strong>Classe :</strong></p>
                         <p class="fs-5" id="eleve-classe"></p>
                     </div>
                     <div class="col-6 col-md-3">
@@ -133,9 +130,8 @@
                 <div style="margin-top: 50px; border-top: 1px dashed #ccc;"></div>
             </div>
         </div>
-        <!-- Bouton modifié pour Télécharger en PDF -->
         <div class="text-center mt-4">
-            <button onclick="telechargerRecu()" class="btn btn-success btn-download">
+            <button type="button" onclick="telechargerRecu()" class="btn btn-success btn-download">
                 <i class="fa-solid fa-file-pdf"></i> Télécharger le reçu
             </button>
         </div>
@@ -147,37 +143,33 @@ function formatArgent(montant) {
     return new Intl.NumberFormat('fr-FR').format(montant) + " FCFA";
 }
 
-// FONCTION CORRIGÉE POUR LE TÉLÉCHARGEMENT DU RECU COMPLET ET VISIBLE
 function telechargerRecu() {
     const element = document.getElementById('receipt');
     const bouton = document.querySelector('.btn-download');
     const nomEleve = document.getElementById('recu-nom').textContent.trim().replace(/\s+/g, '_');
     const numeroRecu = document.getElementById('recu-numero').textContent.trim();
 
-    // 1. On cache temporairement le bouton de téléchargement pour qu'il ne soit pas dans le PDF
-    bouton.style.opacity = '0';
+    // On cache proprement le bouton pour éviter qu'il s'imprime
+    bouton.style.visibility = 'hidden';
 
-    // 2. Options optimisées pour éviter la feuille blanche
     const options = {
-        margin:       15,
+        margin:       10,
         filename:     `Recu_${numeroRecu}_${nomEleve}.pdf`,
-        image:        { type: 'jpeg', quality: 1.0 },
+        image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { 
             scale: 2, 
             useCORS: true,
-            backgroundColor: '#ffffff', // Force le fond en blanc
-            logging: false
+            backgroundColor: '#ffffff'
         },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // 3. Exécution de la capture et du téléchargement
+    // On lance la génération sur l'élément visible à l'écran
     html2pdf().set(options).from(element).save().then(() => {
-        // 4. On réaffiche le bouton une fois le PDF généré
-        bouton.style.opacity = '1';
+        bouton.style.visibility = 'visible';
     }).catch(err => {
-        console.error("Erreur lors de la génération du PDF:", err);
-        bouton.style.opacity = '1';
+        console.error(err);
+        bouton.style.visibility = 'visible';
     });
 }
 
@@ -251,3 +243,6 @@ document.getElementById('paiement-form').addEventListener('submit', function(e) 
         })        
         .catch(err => console.error("Erreur d'enregistrement:", err));
 });
+</script>
+</body>
+</html>
