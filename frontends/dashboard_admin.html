@@ -202,7 +202,7 @@
 
     <div class="sidebar" id="sidebar">
         <div class="logo-area">
-            <span><i class="fa-solid fa-square-poll-horizontal"></i></span> ECOLE BILINGUE <br> LA BONNE SEMANCE
+            <span><i class="fa-solid fa-square-poll-horizontal"></i></span> ECOLE BILINGUE LA BONNE SEMANCE
         </div>
 
         <ul class="sidebar-menu">
@@ -257,31 +257,6 @@
         const links = document.querySelectorAll('.sidebar-menu a');
         const iframe = document.getElementById('content-frame');
         
-        // --- RECUPERATION UNIQUE DES DONNEES DE L'API POUR L'IFRAME ---
-        function chargerDonniesDashboard() {
-            const API_STATS = 'https://gestion-scolaire-production-5e27.up.railway.app/backends/dashboard_stats.php';
-            
-            fetch(API_STATS)
-                .then(res => {
-                    if (!res.ok) throw new Error("Erreur de connexion API");
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.success && iframe.src.includes('dashboard_content.html')) {
-                        // Envoi sécurisé des statistiques directement au document à l'intérieur de l'iframe
-                        iframe.contentWindow.postMessage({
-                            type: 'UPDATE_DASHBOARD_STATS',
-                            total_eleves: data.total_eleves,
-                            total_encaisse: data.total_encaisse
-                        }, '*');
-                    }
-                })
-                .catch(err => console.error("Erreur Dashboard Stats:", err));
-        }
-
-        // Lancement au chargement initial dès que l'iframe a fini de se structurer
-        iframe.addEventListener('load', chargerDonniesDashboard);
-
         links.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
