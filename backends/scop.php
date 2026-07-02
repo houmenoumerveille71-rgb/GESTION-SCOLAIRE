@@ -1,6 +1,6 @@
 <?php
 // =========================================================================
-// 1. GESTION STRICTE DU CORS (DOIT ÊTRE AU TOUT DÉBUT SANS AUN CARACTÈRE AVANT)
+// 1. GESTION STRICTE DU CORS (DOIT ÊTRE AU TOUT DÉBUT SANS AUCUN CARACTÈRE AVANT)
 // =========================================================================
 
 $allowed_origins = [
@@ -22,7 +22,7 @@ header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Origin, Accept");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 
-// Gestion immédiate du Preflight OPTIONS (avant d'inclure d'autres fichiers)
+// Gestion immédiate du Preflight OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
