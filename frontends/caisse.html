@@ -147,28 +147,37 @@ function formatArgent(montant) {
     return new Intl.NumberFormat('fr-FR').format(montant) + " FCFA";
 }
 
-// Fonction pour capturer le reçu et déclencher le téléchargement du PDF
+// FONCTION CORRIGÉE POUR LE TÉLÉCHARGEMENT DU RECU COMPLET ET VISIBLE
 function telechargerRecu() {
     const element = document.getElementById('receipt');
     const bouton = document.querySelector('.btn-download');
     const nomEleve = document.getElementById('recu-nom').textContent.trim().replace(/\s+/g, '_');
     const numeroRecu = document.getElementById('recu-numero').textContent.trim();
 
-    // On cache temporairement le bouton à l'intérieur du reçu pour qu'il n'apparaisse pas sur le PDF
-    bouton.style.display = 'none';
+    // 1. On cache temporairement le bouton de téléchargement pour qu'il ne soit pas dans le PDF
+    bouton.style.opacity = '0';
 
+    // 2. Options optimisées pour éviter la feuille blanche
     const options = {
-        margin:       10,
+        margin:       15,
         filename:     `Recu_${numeroRecu}_${nomEleve}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true,
+            backgroundColor: '#ffffff', // Force le fond en blanc
+            logging: false
+        },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Génération et téléchargement
+    // 3. Exécution de la capture et du téléchargement
     html2pdf().set(options).from(element).save().then(() => {
-        // On réaffiche le bouton une fois le téléchargement lancé
-        bouton.style.display = 'inline-block';
+        // 4. On réaffiche le bouton une fois le PDF généré
+        bouton.style.opacity = '1';
+    }).catch(err => {
+        console.error("Erreur lors de la génération du PDF:", err);
+        bouton.style.opacity = '1';
     });
 }
 
@@ -242,6 +251,3 @@ document.getElementById('paiement-form').addEventListener('submit', function(e) 
         })        
         .catch(err => console.error("Erreur d'enregistrement:", err));
 });
-</script>
-</body>
-</html>
