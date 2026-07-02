@@ -33,14 +33,13 @@ require "config/connexion.php";
 
 try {
     // 1. Compter le nombre total d'élèves
-    // (Ajuste "eleves" si ta table s'appelle autrement, ex: "students")
     $stmtEleves = $bd->query("SELECT COUNT(*) as total_eleves FROM eleves");
     $resEleves = $stmtEleves->fetch(PDO::FETCH_ASSOC);
     $totalEleves = $resEleves['total_eleves'] ?? 0;
 
-    // 2. Calculer le total encaissé
-    // (Ajuste "paiements" et "montant" selon tes vrais noms de table/colonne)
-    $stmtEncaisse = $bd->query("SELECT SUM(montant) as total_recette FROM paiements");
+    // 2. Calculer le total encaissé depuis les frais scolaires / paiements
+    // Note : Remplace "frais_scolaires" et "montant_paye" par tes vrais noms de table/colonne si nécessaire
+    $stmtEncaisse = $bd->query("SELECT SUM(montant_paye) as total_recette FROM frais_scolaires");
     $resEncaisse = $stmtEncaisse->fetch(PDO::FETCH_ASSOC);
     $totalRecette = $resEncaisse['total_recette'] ?? 0;
 
