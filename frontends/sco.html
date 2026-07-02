@@ -15,7 +15,7 @@
             font-family: 'Inter', 'Segoe UI', sans-serif; 
         }
         body { 
-            background-color: #f8fafc; /* Fond ultra-sobre */
+            background-color: #f8fafc; 
             color: #334155; 
             padding: 24px;
         }
@@ -74,7 +74,7 @@
             box-shadow: none;
         }
         .btn-save { 
-            background-color: #0f172a; /* Bouton sombre pro */
+            background-color: #0f172a; 
             color: white; 
             border: none; 
             padding: 7px 16px; 
@@ -87,7 +87,6 @@
         .btn-save:hover { 
             background-color: #1e293b; 
         }
-        /* Notification Toast Style Épuré */
         .toast-notif { 
             position: fixed; 
             bottom: 24px; 
@@ -113,14 +112,19 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width: 100px;">ID</th>
+                        <th style="width: 150px;">Code Classe</th>
                         <th>Nom de la Classe</th>
                         <th style="width: 220px;">Frais Scolaire (FCFA)</th>
                         <th style="width: 150px;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="classes-body">
-                    </tbody>
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 20px; color: #64748b;">
+                            <i class="fa-solid fa-spinner fa-spin me-1"></i> Chargement des données...
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -128,42 +132,70 @@
     <div id="toastNotification" class="toast-notif"></div>
 
     <script>
-        const RAILWAY_BASE = 'https://gestion-scolaire-production-5e27.up.railway.app';
+        // Remplace par l'url complète ou relative de ton fichier backend PHP
+        const URL_API = 'https://gestion-scolaire-production-5e27.up.railway.app/backends/classes/update_frais.php';
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch(`${RAILWAY_BASE}/backends/classes/read.php`)
-                .then(res => res.json())
+        document.addEventListener('DOMContentLoaded', chargerClasses);
+
+        function chargerClasses() {
+            fetch(`${URL_API}?action=get_classes`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Erreur serveur");
+                    return res.json();
+                })
                 .then(data => {
                     const tbody = document.getElementById('classes-body');
                     tbody.innerHTML = '';
-                    data.forEach(classe => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="fw-medium text-secondary">#${classe.id}</td>
-                            <td class="fw-semibold text-dark">${classe.nom_classe}</td>
-                            <td><input type="number" class="input-tarif" id="tarif_${classe.id}" value="${classe.frais_scolaire_defaut || 0}"></td>
-                            <td><button class="btn-save" onclick="mettreAJourTarif(${classe.id})"><i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer</button></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
+                    
+                    if (data.success) {
+                        if (data.classes.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Aucune classe configurée.</td></tr>`;
+                            return;
+                        }
+                        
+                        data.classes.forEach(classe => {
+                            const idSecurise = classe.id.replace(/\s+/g, '_');
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="fw-bold text-dark">${classe.id}</td>
+                                <td class="fw-semibold text-secondary">${classe.nom || 'Non défini'}</td>
+                                <td>
+                                    <input type="number" class="input-tarif" id="tarif_${idSecurise}" value="${classe.frais_scolaire_defaut || 0}">
+                                </td>
+                                <td>
+                                    <button class="btn-save" onclick="mettreAJourTarif('${classe.id}')">
+                                        <i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer
+                                    </button>
+                                </td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Erreur : ${data.message}</td></tr>`;
+                    }
                 })
-                .catch(err => console.error("Erreur chargement classes:", err));
-        });
+                .catch(err => {
+                    console.error("Erreur chargement:", err);
+                    document.getElementById('classes-body').innerHTML = `<tr><td colspan="4" style="text-align:center; color: #dc2626;">Erreur de connexion lors du chargement.</td></tr>`;
+                });
+        }
 
-        function mettreAJourTarif(idClasse) {
-            const montantSaisi = document.getElementById('tarif_' + idClasse).value;
+        function mettreAJourTarif(codeClasse) {
+            const idSecurise = codeClasse.replace(/\s+/g, '_');
+            const montantSaisi = document.getElementById('tarif_' + idSecurise).value;
             const toast = document.getElementById('toastNotification');
 
-            if(montantSaisi === '' || montantSaisi < 0) {
+            if (montantSaisi === '' || montantSaisi < 0) {
                 alert("Veuillez entrer un montant valide.");
                 return;
             }
 
             const formData = new FormData();
-            formData.append('id', idClasse);
-            formData.append('frais_scolaire_defaut', montantSaisi);
+            formData.append('action', 'update_tarif');
+            formData.append('id_classe', codeClasse);
+            formData.append('montant', montantSaisi);
 
-            fetch(`${RAILWAY_BASE}/backends/classes_frais/update.php`, {
+            fetch(URL_API, {
                 method: 'POST',
                 body: formData
             })
