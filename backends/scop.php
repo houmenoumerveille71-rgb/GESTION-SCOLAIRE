@@ -31,10 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // =========================================================================
 // 2. CONFIGURATION ET CONNEXION
 // =========================================================================
-require __DIR__ . "/../config/connexion.php";
+require "config/connexion.php";
 
 // =========================================================================
-// 3. ACTION : CHARGEMENT DES CLASSES (GET)
+// 3. ACTION : CHARGEMENT DES CLASSES (GET
 // =========================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_classes') {
     header("Content-Type: application/json; charset=UTF-8");
