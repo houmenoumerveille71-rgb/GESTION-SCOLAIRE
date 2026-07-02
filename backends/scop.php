@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // =========================================================================
 // 2. CONFIGURATION ET CONNEXION
 // =========================================================================
-require "../config/connexion.php";
+require __DIR__ . "/../config/connexion.php";
 
 // =========================================================================
 // 3. ACTION : CHARGEMENT DES CLASSES (GET)
