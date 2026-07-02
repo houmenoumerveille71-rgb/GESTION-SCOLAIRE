@@ -3,276 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - ScolarTech</title>
+    <title>Dashboard Content</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/responsive.css">
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
             background-color: #f8fafc;
-            display: flex;
-            min-height: 100vh;
             color: #334155;
-            overflow-x: hidden;
+            padding: 12px 4px;
+            font-family: 'Inter', sans-serif;
         }
-
-        /* --- SIDEBAR LOOK PRO & SOMBRE DISCRET --- */
-        .sidebar {
-            width: 260px;
+        .stat-card {
             background-color: #ffffff;
-            border-right: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            padding: 24px 0;
-            position: fixed;
-            height: 100vh;
-            z-index: 1040;
-            transition: transform 0.3s ease, width 0.3s ease;
-        }
-
-        .sidebar .logo-area {
-            padding: 0 24px 24px 24px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #0f172a;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #f1f5f9;
-            margin-bottom: 16px;
-        }
-
-        .sidebar .logo-area i {
-            color: #475569;
-            font-size: 22px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 0 12px;
-        }
-
-        .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: #64748b;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .sidebar-menu li a:hover {
-            color: #0f172a;
-            background-color: #f1f5f9;
-        }
-
-        .sidebar-menu li a.active {
-            color: #0f172a;
-            background-color: #f1f5f9;
-            font-weight: 600;
-        }
-
-        .sidebar-menu li a i {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-            color: #94a3b8;
-            transition: color 0.2s ease;
-        }
-
-        .sidebar-menu li a:hover i, .sidebar-menu li a.active i {
-            color: #475569;
-        }
-
-        /* --- MAIN CONTENT & TOPBAR --- */
-        .main-content {
-            margin-left: 260px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            transition: margin-left 0.3s ease;
-        }
-
-        .topbar {
-            background-color: #ffffff;
-            height: 65px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 32px;
-            border-bottom: 1px solid #e2e8f0;
+            transition: transform 0.2s;
         }
-
-        .user-profile {
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .stat-title {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            font-size: 14px;
-            font-weight: 500;
-            color: #334155;
-            margin-left: auto; /* Aligne le profil à droite maintenant que la recherche est retirée */
-        }
-
-        .user-profile i {
-            margin-right: 6px;
-            color: #64748b;
-        }
-
-        /* --- CONTAINER IFRAME ÉPURÉ --- */
-        .iframe-container {
-            flex: 1;
-            padding: 24px;
-            background-color: #f8fafc;
-        }
-
-        .iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            background: #ffffff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
-        }
-
-        .navbar-toggler-btn {
-            display: none;
-            background: none;
-            border: none;
+            justify-content: center;
             font-size: 20px;
-            color: #334155;
-            cursor: pointer;
         }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.3);
-            backdrop-filter: blur(2px);
-            z-index: 1030;
-        }
-
-        /* --- ADAPTATION RESPONSIVE --- */
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .sidebar-overlay.active {
-                display: block;
-            }
-            .main-content {
-                margin-left: 0 !important;
-            }
-            .navbar-toggler-btn {
-                display: block;
-            }
-            .topbar {
-                padding: 0 16px;
-            }
-            .iframe-container {
-                padding: 12px;
-            }
-        }
+        .icon-blue { background-color: #eff6ff; color: #2563eb; }
+        .icon-green { background-color: #ecfdf5; color: #059669; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="logo-area">
-            <span><i class="fa-solid fa-square-poll-horizontal"></i></span> ScolarTech
-        </div>
-
-        <ul class="sidebar-menu">
-            <li><a href="#" data-page="dashboard_content.html" class="active"><i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span></a></li>
-            <li><a href="#" data-page="liste.html"><i class="fa-solid fa-graduation-cap"></i> <span>Gestion Élèves</span></a></li>
-            <li><a href="#" data-page="sco.html"><i class="fa-solid fa-wallet"></i> <span>Frais Scolaires</span></a></li>
-            <li><a href="#" data-page="listepaiement.html"><i class="fa-solid fa-receipt"></i> <span>Gestion Paiements</span></a></li>
-        </ul>
-    </div>
-
-    <div class="main-content">
-        <div class="topbar">
-            <button class="navbar-toggler-btn" id="sidebarToggleMobile">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            
-            <div class="user-profile">
-                <span><i class="fa-solid fa-circle-user"></i> Admin</span>
-                <button onclick="logout()" class="btn btn-sm btn-link text-danger text-decoration-none ms-3 fw-medium">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
-                </button>
+    <div class="container-fluid">
+        <h2 class="fs-5 fw-bold text-dark mb-4">Vue d'ensemble</h2>
+        
+        <div class="row g-4">
+            <!-- Carte 1 : Effectif Élèves -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-title">Effectif Global</div>
+                        <div class="stat-value" id="count-eleves"><i class="fa-solid fa-spinner fa-spin fs-5 text-muted"></i></div>
+                    </div>
+                    <div class="stat-icon icon-blue">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="iframe-container">
-            <iframe id="content-frame" src="dashboard_content.html"></iframe>
+            <!-- Carte 2 : Total Encaissé -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-title">Total Encaissé</div>
+                        <div class="stat-value" id="sum-encaisse"><i class="fa-solid fa-spinner fa-spin fs-5 text-muted"></i></div>
+                    </div>
+                    <div class="stat-icon icon-green">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-    function logout() {
-        fetch('https://gestion-scolaire-production-5e27.up.railway.app/backends/auth/logout.php', { method: 'POST', credentials: 'include' })
-            .then(() => {
-                localStorage.removeItem('user');
-                window.location.href = 'connexion.html';
-            });
-    }
+        const API_URL = 'https://gestion-scolaire-production-5e27.up.railway.app/backends/dashboard_stats.php';
 
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
-
-    function toggleSidebar() {
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-    }
-    
-    if (sidebarToggleMobile) sidebarToggleMobile.addEventListener('click', toggleSidebar);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const links = document.querySelectorAll('.sidebar-menu a');
-        const iframe = document.getElementById('content-frame');
-        
-        links.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                links.forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-                
-                const page = this.getAttribute('data-page');
-                iframe.src = page;
-                
-                if (window.innerWidth <= 992) {
-                    toggleSidebar();
-                }
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch(API_URL)
+                .then(res => {
+                    if (!res.ok) throw new Error("Erreur serveur de statistiques");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Injection du nombre d'élèves
+                        document.getElementById('count-eleves').innerText = data.total_eleves + ' Élèves';
+                        
+                        // Injection et formatage de la recette en FCFA
+                        const formatRecette = new Intl.NumberFormat('fr-FR').format(data.total_encaisse);
+                        document.getElementById('sum-encaisse').innerText = formatRecette + ' FCFA';
+                    } else {
+                        console.error("Erreur renvoyée par l'API :", data.message);
+                        AfficherErreur();
+                    }
+                })
+                .catch(err => {
+                    console.error("Erreur réseau :", err);
+                    AfficherErreur();
+                });
         });
-    });
+
+        function AfficherErreur() {
+            document.getElementById('count-eleves').innerHTML = `<span class="fs-6 text-danger">Échec</span>`;
+            document.getElementById('sum-encaisse').innerHTML = `<span class="fs-6 text-danger">Échec</span>`;
+        }
     </script>
 </body>
 </html>
